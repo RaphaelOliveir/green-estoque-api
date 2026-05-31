@@ -4,7 +4,10 @@ import { z } from 'zod';
 const ReportQuerySchema = z.object({
   startDate: z
     .string()
-    .datetime({ message: 'startDate deve estar no formato ISO 8601 (ex: 2024-01-01T00:00:00Z)' })
+    .datetime({
+      message:
+        'startDate deve estar no formato ISO 8601 (ex: 2024-01-01T00:00:00Z)',
+    })
     .optional(),
   endDate: z
     .string()

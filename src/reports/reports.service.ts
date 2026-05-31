@@ -8,7 +8,16 @@ export class ReportsService {
   constructor(private prisma: PrismaService) {}
 
   async getMovementsReport(query: ReportQueryDto) {
-    const { startDate, endDate, productId, type, categoryId, brand, page, limit } = query;
+    const {
+      startDate,
+      endDate,
+      productId,
+      type,
+      categoryId,
+      brand,
+      page,
+      limit,
+    } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.InventoryMovementWhereInput = {
@@ -21,9 +30,11 @@ export class ReportsService {
           }
         : {}),
       ...(productId && { productId }),
-      ...(type && { type: type as MovementType }),
+      ...(type && { type: type }),
       ...(categoryId && { product: { categoryId } }),
-      ...(brand && { product: { brand: { contains: brand, mode: 'insensitive' as const } } }),
+      ...(brand && {
+        product: { brand: { contains: brand, mode: 'insensitive' as const } },
+      }),
     };
 
     const [total, movements] = await Promise.all([
@@ -32,7 +43,13 @@ export class ReportsService {
         where,
         include: {
           product: {
-            select: { id: true, code: true, name: true, brand: true, category: true },
+            select: {
+              id: true,
+              code: true,
+              name: true,
+              brand: true,
+              category: true,
+            },
           },
           user: { select: { id: true, name: true } },
         },
@@ -132,7 +149,9 @@ export class ReportsService {
       take: limit,
     });
 
-    const productIds = [...new Set([...topEntered, ...topExited].map((t) => t.productId))];
+    const productIds = [
+      ...new Set([...topEntered, ...topExited].map((t) => t.productId)),
+    ];
 
     const products = await this.prisma.product.findMany({
       where: { id: { in: productIds } },

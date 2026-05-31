@@ -73,7 +73,9 @@ export class InventoryService {
       this.prisma.inventoryMovement.findMany({
         where,
         include: {
-          product: { select: { id: true, code: true, name: true, brand: true } },
+          product: {
+            select: { id: true, code: true, name: true, brand: true },
+          },
           user: { select: { id: true, name: true } },
         },
         orderBy: { createdAt: 'desc' },
@@ -96,7 +98,9 @@ export class InventoryService {
   }
 
   async findProductHistory(productId: string, page: number, limit: number) {
-    const product = await this.prisma.product.findUnique({ where: { id: productId } });
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
     if (!product) throw new NotFoundException('Produto não encontrado');
 
     const skip = (page - 1) * limit;

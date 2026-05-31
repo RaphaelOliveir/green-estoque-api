@@ -10,7 +10,13 @@ import {
   Query,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -39,12 +45,24 @@ export class ProductsController {
 
   @Get()
   @ApiOperation({ summary: 'Listar produtos com filtros e paginação' })
-  @ApiQuery({ name: 'search', required: false, description: 'Busca por nome, código ou marca' })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Busca por nome, código ou marca',
+  })
   @ApiQuery({ name: 'brand', required: false })
-  @ApiQuery({ name: 'type', required: false, enum: ['MONOCRYSTALLINE', 'POLYCRYSTALLINE', 'THIN_FILM', 'BIFACIAL'] })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    enum: ['MONOCRYSTALLINE', 'POLYCRYSTALLINE', 'THIN_FILM', 'BIFACIAL'],
+  })
   @ApiQuery({ name: 'categoryId', required: false })
   @ApiQuery({ name: 'code', required: false })
-  @ApiQuery({ name: 'lowStock', required: false, description: 'Filtrar produtos com estoque baixo' })
+  @ApiQuery({
+    name: 'lowStock',
+    required: false,
+    description: 'Filtrar produtos com estoque baixo',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   findAll(@Query() filter: FilterProductsDto) {
@@ -81,7 +99,10 @@ export class ProductsController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Atualizar produto (Admin)' })
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateProductDto) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateProductDto,
+  ) {
     return this.productsService.update(id, dto);
   }
 

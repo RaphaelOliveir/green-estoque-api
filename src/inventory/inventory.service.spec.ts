@@ -64,10 +64,18 @@ describe('InventoryService', () => {
   describe('createMovement', () => {
     it('should register an ENTRY movement and update stock', async () => {
       mockPrisma.product.findUnique.mockResolvedValue(mockProduct);
-      mockPrisma.$transaction.mockResolvedValue([mockMovement, { ...mockProduct, quantity: 30 }]);
+      mockPrisma.$transaction.mockResolvedValue([
+        mockMovement,
+        { ...mockProduct, quantity: 30 },
+      ]);
 
       const result = await service.createMovement(
-        { productId: 'prod-1', type: 'ENTRY', quantity: 10, reason: 'Purchase' },
+        {
+          productId: 'prod-1',
+          type: 'ENTRY',
+          quantity: 10,
+          reason: 'Purchase',
+        },
         'user-1',
       );
 
@@ -76,9 +84,16 @@ describe('InventoryService', () => {
     });
 
     it('should register an EXIT movement when stock is sufficient', async () => {
-      const exitMovement = { ...mockMovement, type: MovementType.EXIT, quantity: 5 };
+      const exitMovement = {
+        ...mockMovement,
+        type: MovementType.EXIT,
+        quantity: 5,
+      };
       mockPrisma.product.findUnique.mockResolvedValue(mockProduct);
-      mockPrisma.$transaction.mockResolvedValue([exitMovement, { ...mockProduct, quantity: 15 }]);
+      mockPrisma.$transaction.mockResolvedValue([
+        exitMovement,
+        { ...mockProduct, quantity: 15 },
+      ]);
 
       const result = await service.createMovement(
         { productId: 'prod-1', type: 'EXIT', quantity: 5 },
@@ -92,15 +107,24 @@ describe('InventoryService', () => {
       mockPrisma.product.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.createMovement({ productId: 'non-existent', type: 'EXIT', quantity: 1 }, 'user-1'),
+        service.createMovement(
+          { productId: 'non-existent', type: 'EXIT', quantity: 1 },
+          'user-1',
+        ),
       ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException when stock is insufficient for EXIT', async () => {
-      mockPrisma.product.findUnique.mockResolvedValue({ ...mockProduct, quantity: 5 });
+      mockPrisma.product.findUnique.mockResolvedValue({
+        ...mockProduct,
+        quantity: 5,
+      });
 
       await expect(
-        service.createMovement({ productId: 'prod-1', type: 'EXIT', quantity: 10 }, 'user-1'),
+        service.createMovement(
+          { productId: 'prod-1', type: 'EXIT', quantity: 10 },
+          'user-1',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -126,9 +150,9 @@ describe('InventoryService', () => {
     it('should throw NotFoundException when product does not exist', async () => {
       mockPrisma.product.findUnique.mockResolvedValue(null);
 
-      await expect(service.findProductHistory('non-existent', 1, 20)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.findProductHistory('non-existent', 1, 20),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

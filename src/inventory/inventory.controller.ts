@@ -8,7 +8,13 @@ import {
   Query,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { MovementType } from '@prisma/client';
 import { InventoryService } from './inventory.service';
 import { CreateMovementDto } from './dto/create-movement.dto';
@@ -24,7 +30,10 @@ export class InventoryController {
 
   @Post('movements')
   @ApiOperation({ summary: 'Registrar entrada ou saída de estoque' })
-  @ApiResponse({ status: 201, description: 'Movimentação registrada com sucesso' })
+  @ApiResponse({
+    status: 201,
+    description: 'Movimentação registrada com sucesso',
+  })
   @ApiResponse({ status: 400, description: 'Estoque insuficiente' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado' })
   createMovement(
@@ -66,6 +75,10 @@ export class InventoryController {
     @Query('page') page = '1',
     @Query('limit') limit = '20',
   ) {
-    return this.inventoryService.findProductHistory(id, parseInt(page, 10), parseInt(limit, 10));
+    return this.inventoryService.findProductHistory(
+      id,
+      parseInt(page, 10),
+      parseInt(limit, 10),
+    );
   }
 }

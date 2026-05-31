@@ -1,5 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
 import { ReportQueryDto } from './dto/report-query.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -13,7 +18,11 @@ export class ReportsController {
 
   @Get('movements')
   @ApiOperation({ summary: 'Relatório de movimentações por período' })
-  @ApiQuery({ name: 'startDate', required: false, description: 'ISO 8601 (ex: 2024-01-01T00:00:00Z)' })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: 'ISO 8601 (ex: 2024-01-01T00:00:00Z)',
+  })
   @ApiQuery({ name: 'endDate', required: false })
   @ApiQuery({ name: 'productId', required: false })
   @ApiQuery({ name: 'type', required: false, enum: ['ENTRY', 'EXIT'] })

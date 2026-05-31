@@ -16,7 +16,21 @@ export default tseslint.config(
       globals: {
         ...globals.node,
       },
-      sourceType: 'commonjs',
+      sourceType: 'module',
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
+    files: ['test/**/*.ts', '**/*.spec.ts', 'vitest.config.ts', 'vitest.config.e2e.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.vitest,
+      },
+      sourceType: 'module',
       parserOptions: {
         projectService: true,
         tsconfigRootDir: import.meta.dirname,

@@ -24,7 +24,9 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateUserDto) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
     if (existing) {
       throw new ConflictException('E-mail já cadastrado');
     }
@@ -37,16 +39,27 @@ export class UsersService {
   }
 
   findAll() {
-    return this.prisma.user.findMany({ select: USER_SELECT, orderBy: { createdAt: 'desc' } });
+    return this.prisma.user.findMany({
+      select: USER_SELECT,
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id }, select: USER_SELECT });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: USER_SELECT,
+    });
     if (!user) throw new NotFoundException('Usuário não encontrado');
     return user;
   }
 
-  async update(id: string, dto: UpdateUserDto, requesterId: string, requesterRole: Role) {
+  async update(
+    id: string,
+    dto: UpdateUserDto,
+    requesterId: string,
+    requesterRole: Role,
+  ) {
     await this.findOne(id);
 
     if (requesterId !== id && requesterRole !== Role.ADMIN) {
@@ -62,7 +75,11 @@ export class UsersService {
       data.password = await bcrypt.hash(dto.password, 10);
     }
 
-    return this.prisma.user.update({ where: { id }, data, select: USER_SELECT });
+    return this.prisma.user.update({
+      where: { id },
+      data,
+      select: USER_SELECT,
+    });
   }
 
   async remove(id: string) {

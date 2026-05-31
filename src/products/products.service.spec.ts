@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ProductType } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { ProductsService } from './products.service';
@@ -125,7 +129,9 @@ describe('ProductsService', () => {
     it('should throw NotFoundException when product does not exist', async () => {
       mockPrisma.product.findUnique.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -166,7 +172,9 @@ describe('ProductsService', () => {
       mockPrisma.product.findUnique.mockResolvedValue(mockProduct);
       mockPrisma.inventoryMovement.count.mockResolvedValue(5);
 
-      await expect(service.remove('prod-1')).rejects.toThrow(BadRequestException);
+      await expect(service.remove('prod-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should delete product successfully when no movements exist', async () => {
