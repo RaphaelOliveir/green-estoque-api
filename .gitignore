@@ -1,0 +1,35 @@
+# NestJS
+/dist
+/node_modules
+/build
+/tmp
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment variables
+.env
+.env.development
+.env.test
+.env.production
+
+# Temp
+.temp
+.tmp
+
+# Coverage
+/coverage
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# OS
+.DS_Store
+Thumbs.db
