@@ -17,10 +17,15 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateProductDto) {
-    const existing = await this.prisma.product.findUnique({ where: { code: dto.code } });
-    if (existing) throw new ConflictException('Já existe um produto com este código');
+    const existing = await this.prisma.product.findUnique({
+      where: { code: dto.code },
+    });
+    if (existing)
+      throw new ConflictException('Já existe um produto com este código');
 
-    const category = await this.prisma.category.findUnique({ where: { id: dto.categoryId } });
+    const category = await this.prisma.category.findUnique({
+      where: { id: dto.categoryId },
+    });
     if (!category) throw new NotFoundException('Categoria não encontrada');
 
     return this.prisma.product.create({
@@ -33,7 +38,8 @@ export class ProductsService {
   }
 
   async findAll(filter: FilterProductsDto) {
-    const { search, brand, type, categoryId, code, lowStock, page, limit } = filter;
+    const { search, brand, type, categoryId, code, lowStock, page, limit } =
+      filter;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ProductWhereInput = {
@@ -46,7 +52,7 @@ export class ProductsService {
         ],
       }),
       ...(brand && { brand: { contains: brand, mode: 'insensitive' } }),
-      ...(type && { type: type as ProductType }),
+      ...(type && { type: type }),
       ...(categoryId && { categoryId }),
       ...(code && { code: { contains: code, mode: 'insensitive' } }),
       ...(lowStock && { quantity: { lte: LOW_STOCK_THRESHOLD } }),
@@ -97,7 +103,13 @@ export class ProductsService {
   async getStock(id: string) {
     const product = await this.prisma.product.findUnique({
       where: { id },
-      select: { id: true, code: true, name: true, quantity: true, updatedAt: true },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        quantity: true,
+        updatedAt: true,
+      },
     });
     if (!product) throw new NotFoundException('Produto não encontrado');
     return {
@@ -110,7 +122,9 @@ export class ProductsService {
     await this.findOne(id);
 
     if (dto.categoryId) {
-      const category = await this.prisma.category.findUnique({ where: { id: dto.categoryId } });
+      const category = await this.prisma.category.findUnique({
+        where: { id: dto.categoryId },
+      });
       if (!category) throw new NotFoundException('Categoria não encontrada');
     }
 
@@ -118,7 +132,9 @@ export class ProductsService {
       where: { id },
       data: {
         ...dto,
-        ...(dto.price !== undefined && { price: new Prisma.Decimal(dto.price) }),
+        ...(dto.price !== undefined && {
+          price: new Prisma.Decimal(dto.price),
+        }),
       },
       include: { category: true },
     });

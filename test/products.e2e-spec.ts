@@ -45,16 +45,23 @@ describe('Products (e2e)', () => {
     adminToken = loginRes.body.access_token as string;
 
     const category = await prisma.category.create({
-      data: { name: `Test Category ${Date.now()}`, description: 'E2E test category' },
+      data: {
+        name: `Test Category ${Date.now()}`,
+        description: 'E2E test category',
+      },
     });
     categoryId = category.id;
   });
 
   afterAll(async () => {
-    await prisma.inventoryMovement.deleteMany({ where: { product: { categoryId } } });
+    await prisma.inventoryMovement.deleteMany({
+      where: { product: { categoryId } },
+    });
     await prisma.product.deleteMany({ where: { categoryId } });
     await prisma.category.delete({ where: { id: categoryId } });
-    await prisma.user.deleteMany({ where: { email: 'admin-prod-test@test.com' } });
+    await prisma.user.deleteMany({
+      where: { email: 'admin-prod-test@test.com' },
+    });
     await app.close();
   });
 
@@ -99,7 +106,14 @@ describe('Products (e2e)', () => {
     it('should fail without authentication', async () => {
       await request(app.getHttpServer())
         .post('/api/v1/products')
-        .send({ code: 'NO-AUTH', name: 'Test', brand: 'B', type: 'MONOCRYSTALLINE', categoryId, price: 100 })
+        .send({
+          code: 'NO-AUTH',
+          name: 'Test',
+          brand: 'B',
+          type: 'MONOCRYSTALLINE',
+          categoryId,
+          price: 100,
+        })
         .expect(401);
     });
   });

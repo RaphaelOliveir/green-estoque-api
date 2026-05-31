@@ -4,7 +4,9 @@ import { z } from 'zod';
 const FilterProductsSchema = z.object({
   search: z.string().optional(),
   brand: z.string().optional(),
-  type: z.enum(['MONOCRYSTALLINE', 'POLYCRYSTALLINE', 'THIN_FILM', 'BIFACIAL']).optional(),
+  type: z
+    .enum(['MONOCRYSTALLINE', 'POLYCRYSTALLINE', 'THIN_FILM', 'BIFACIAL'])
+    .optional(),
   categoryId: z.string().uuid().optional(),
   code: z.string().optional(),
   lowStock: z

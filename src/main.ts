@@ -44,7 +44,9 @@ Inclua o token no header: \`Authorization: Bearer <token>\`
     .addTag('Relatórios', 'Relatórios e análises')
     .build();
 
-  const document = cleanupOpenApiDoc(SwaggerModule.createDocument(app, swaggerConfig));
+  const document = cleanupOpenApiDoc(
+    SwaggerModule.createDocument(app, swaggerConfig),
+  );
   SwaggerModule.setup('docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,

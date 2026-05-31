@@ -82,7 +82,12 @@ describe('Inventory (e2e)', () => {
       const res = await request(app.getHttpServer())
         .post('/api/v1/inventory/movements')
         .set('Authorization', `Bearer ${token}`)
-        .send({ productId, type: 'ENTRY', quantity: 10, reason: 'Compra de fornecedor' })
+        .send({
+          productId,
+          type: 'ENTRY',
+          quantity: 10,
+          reason: 'Compra de fornecedor',
+        })
         .expect(201);
 
       expect(res.body.type).toBe('ENTRY');

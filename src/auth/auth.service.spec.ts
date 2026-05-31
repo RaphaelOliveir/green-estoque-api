@@ -68,7 +68,10 @@ describe('AuthService', () => {
     it('should return null on wrong password', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
 
-      const result = await service.validateUser('test@test.com', 'WrongPassword');
+      const result = await service.validateUser(
+        'test@test.com',
+        'WrongPassword',
+      );
 
       expect(result).toBeNull();
     });
@@ -100,7 +103,9 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException when user not found', async () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.getProfile('non-existent-id')).rejects.toThrow(UnauthorizedException);
+      await expect(service.getProfile('non-existent-id')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });
