@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  OPERATOR
+}
+
+enum MovementType {
+  ENTRY
+  EXIT
+}
+
+enum ProductType {
+  MONOCRYSTALLINE
+  POLYCRYSTALLINE
+  THIN_FILM
+  BIFACIAL
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(OPERATOR)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  movements InventoryMovement[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  code        String      @unique
+  name        String
+  description String?
+  brand       String
+  type        ProductType
+  wattage     Int?
+  categoryId  String      @map("category_id")
+  price       Decimal     @db.Decimal(10, 2)
+  quantity    Int         @default(0)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  category  Category            @relation(fields: [categoryId], references: [id])
+  movements InventoryMovement[]
+
+  @@map("products")
+}
+
+model InventoryMovement {
+  id        String       @id @default(uuid())
+  productId String       @map("product_id")
+  type      MovementType
+  quantity  Int
+  reason    String?
+  userId    String       @map("user_id")
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@map("inventory_movements")
+}

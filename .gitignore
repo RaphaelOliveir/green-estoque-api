@@ -1,4 +1,4 @@
-# Nestjs specific
+# NestJS
 /dist
 /node_modules
 /build
@@ -13,12 +13,23 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# dotenv environment variable files
+# Environment variables
 .env
 .env.development
 .env.test
 .env.production
 
-# temp directory
+# Temp
 .temp
 .tmp
+
+# Coverage
+/coverage
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# OS
+.DS_Store
+Thumbs.db
