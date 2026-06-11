@@ -31,7 +31,6 @@ describe('Auth (e2e)', () => {
         name: 'Test User',
         email: 'test@test.com',
         password: hashedPassword,
-        role: 'ADMIN',
       },
     });
   });

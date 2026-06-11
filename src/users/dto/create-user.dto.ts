@@ -9,7 +9,6 @@ const CreateUserSchema = z.object({
     .min(8, 'Senha deve ter no mínimo 8 caracteres')
     .regex(/[A-Z]/, 'Senha deve conter ao menos uma letra maiúscula')
     .regex(/[0-9]/, 'Senha deve conter ao menos um número'),
-  role: z.enum(['ADMIN', 'OPERATOR']).default('OPERATOR'),
 });
 
 export class CreateUserDto extends createZodDto(CreateUserSchema) {}

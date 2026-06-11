@@ -1,9 +1,8 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { cleanupOpenApiDoc, ZodValidationPipe } from 'nestjs-zod';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { RolesGuard } from './common/guards/roles.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,7 +17,6 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ZodValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalGuards(new RolesGuard(new Reflector()));
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Green Estoque API')
@@ -28,10 +26,6 @@ async function bootstrap() {
 ## Autenticação
 Use o endpoint \`POST /api/v1/auth/login\` para obter o token JWT.
 Inclua o token no header: \`Authorization: Bearer <token>\`
-
-## Credenciais padrão (após seed)
-- **Admin:** admin@greenestoque.com / Admin@123
-- **Operador:** operador@greenestoque.com / Operator@123
       `,
     )
     .setVersion('1.0')

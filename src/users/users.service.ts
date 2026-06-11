@@ -2,19 +2,16 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
-  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcryptjs';
-import { Role } from '@prisma/client';
 
 const USER_SELECT = {
   id: true,
   name: true,
   email: true,
-  role: true,
   createdAt: true,
   updatedAt: true,
 };
@@ -54,21 +51,8 @@ export class UsersService {
     return user;
   }
 
-  async update(
-    id: string,
-    dto: UpdateUserDto,
-    requesterId: string,
-    requesterRole: Role,
-  ) {
+  async update(id: string, dto: UpdateUserDto) {
     await this.findOne(id);
-
-    if (requesterId !== id && requesterRole !== Role.ADMIN) {
-      throw new ForbiddenException('Sem permissão para atualizar este usuário');
-    }
-
-    if (dto.role && requesterRole !== Role.ADMIN) {
-      throw new ForbiddenException('Apenas admins podem alterar papéis');
-    }
 
     const data: Record<string, unknown> = { ...dto };
     if (dto.password) {

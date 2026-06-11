@@ -34,7 +34,6 @@ describe('Inventory (e2e)', () => {
         name: 'Inventory Tester',
         email: 'inv-test@test.com',
         password: hashedPassword,
-        role: 'OPERATOR',
       },
     });
 

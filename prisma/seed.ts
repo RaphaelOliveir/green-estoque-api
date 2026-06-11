@@ -1,30 +1,28 @@
-import { PrismaClient, Role, ProductType } from '@prisma/client';
+import { PrismaClient, ProductType } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   const adminPassword = await bcrypt.hash('Admin@123', 10);
-  const admin = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'admin@greenestoque.com' },
     update: {},
     create: {
       name: 'Administrador',
       email: 'admin@greenestoque.com',
       password: adminPassword,
-      role: Role.ADMIN,
     },
   });
 
-  const operatorPassword = await bcrypt.hash('Operator@123', 10);
+  const userPassword = await bcrypt.hash('User@123', 10);
   await prisma.user.upsert({
-    where: { email: 'operador@greenestoque.com' },
+    where: { email: 'usuario@greenestoque.com' },
     update: {},
     create: {
-      name: 'Operador Padrão',
-      email: 'operador@greenestoque.com',
-      password: operatorPassword,
-      role: Role.OPERATOR,
+      name: 'Usuário Padrão',
+      email: 'usuario@greenestoque.com',
+      password: userPassword,
     },
   });
 
@@ -111,8 +109,8 @@ async function main() {
   });
 
   console.log('✅ Seed concluído com sucesso!');
-  console.log(`👤 Admin: admin@greenestoque.com / Admin@123`);
-  console.log(`👤 Operador: operador@greenestoque.com / Operator@123`);
+  console.log(`👤 Usuário 1: admin@greenestoque.com / Admin@123`);
+  console.log(`👤 Usuário 2: usuario@greenestoque.com / User@123`);
 }
 
 main()
