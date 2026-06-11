@@ -34,7 +34,6 @@ describe('Products (e2e)', () => {
         name: 'Admin Products Test',
         email: 'admin-prod-test@test.com',
         password: hashedPassword,
-        role: 'ADMIN',
       },
     });
 

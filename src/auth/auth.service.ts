@@ -30,7 +30,6 @@ export class AuthService {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role,
       name: user.name,
     };
 
@@ -40,7 +39,6 @@ export class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
       },
     };
   }
@@ -52,7 +50,6 @@ export class AuthService {
         id: true,
         name: true,
         email: true,
-        role: true,
         createdAt: true,
         updatedAt: true,
       },

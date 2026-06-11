@@ -5,14 +5,12 @@ import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
-import { Role } from '@prisma/client';
 
 const mockUser = {
   id: 'user-uuid-1',
   name: 'Test User',
   email: 'test@test.com',
   password: '',
-  role: Role.OPERATOR,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
