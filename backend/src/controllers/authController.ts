@@ -23,7 +23,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 export const getMe = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = (req as any).user.id;
-    const users = await query<any>('SELECT id, nome, email, perfil, avatar FROM usuarios WHERE id = ?', [id]);
+    const users = await query<any>('SELECT id, nome, email, perfil, foto_url AS avatar FROM usuarios WHERE id = ?', [id]);
     if (users.length === 0) return next(createError('Usuário não encontrado', 404));
     res.json(users[0]);
   } catch (error) {
@@ -46,12 +46,12 @@ export const updateSenha = async (req: Request, res: Response, next: NextFunctio
   try {
     const id = (req as any).user.id;
     const { senhaAtual, novaSenha } = req.body;
-    const users = await query<any>('SELECT senha FROM usuarios WHERE id = ?', [id]);
+    const users = await query<any>('SELECT senha_hash AS senha FROM usuarios WHERE id = ?', [id]);
     if (users.length === 0) return next(createError('Usuário não encontrado', 404));
     const match = await bcrypt.compare(senhaAtual, users[0].senha);
     if (!match) return next(createError('Senha atual incorreta', 400));
     const hash = await bcrypt.hash(novaSenha, 12);
-    await execute('UPDATE usuarios SET senha = ? WHERE id = ?', [hash, id]);
+    await execute('UPDATE usuarios SET senha_hash = ? WHERE id = ?', [hash, id]);
     res.json({ message: 'Senha atualizada' });
   } catch (error) {
     next(createError('Erro ao atualizar senha', 500));
@@ -63,7 +63,7 @@ export const uploadFoto = async (req: Request, res: Response, next: NextFunction
     const id = (req as any).user.id;
     const avatar = (req as any).file?.filename;
     if (!avatar) return next(createError('Nenhuma imagem enviada', 400));
-    await execute('UPDATE usuarios SET avatar = ? WHERE id = ?', [avatar, id]);
+    await execute('UPDATE usuarios SET foto_url = ? WHERE id = ?', [avatar, id]);
     res.json({ message: 'Foto atualizada', avatar });
   } catch (error) {
     next(createError('Erro no upload', 500));

@@ -8,7 +8,7 @@ import { testConnection }  from './config/database';
 import { initDb }          from './config/initDb';
 import { errorHandler }    from './middlewares/errorHandler';
 import { seedAdmin }       from './controllers/authController';
-
+import { setupSwagger }    from './config/swagger';
 
 // Rotas (criadas nos próximos passos)
 import authRoutes          from './routes/authRoutes';
@@ -61,6 +61,9 @@ app.use('/pedidos',       pedidosRoutes);
 app.use('/movimentacoes', movimentacoesRoutes);
 app.use('/dashboard',     dashboardRoutes);
 app.use('/busca',         buscaRoutes);
+
+// Swagger
+setupSwagger(app);
 
 // ─────────────────────────────────────────────────
 // 404 — rota não encontrada
