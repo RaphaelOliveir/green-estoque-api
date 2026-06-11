@@ -55,7 +55,10 @@ export const createUsuario = async (req: Request, res: Response, next: NextFunct
   try {
     const { nome, email, senha, perfil, ativo } = req.body;
     const hash = await bcrypt.hash(senha, 12);
-    const result: any = await execute('INSERT INTO usuarios (nome, email, senha, perfil, ativo) VALUES (?, ?, ?, ?, ?)', [nome, email, hash, perfil || 'USER', ativo !== undefined ? ativo : 1]);
+    const result: any = await execute(
+      'INSERT INTO usuarios (nome, email, senha_hash, perfil, ativo) VALUES (?, ?, ?, ?, ?)',
+      [nome, email, hash, perfil || 'USER', ativo !== undefined ? ativo : 1]
+    );
     res.status(201).json({ id: result.insertId, nome, email, perfil });
   } catch (error) {
     next(createError('Erro ao criar usuário', 500));
