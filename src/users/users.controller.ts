@@ -22,10 +22,9 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @ApiTags('Usuários')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) { }
 
   @Post()
   @ApiOperation({ summary: 'Criar novo usuário' })
@@ -36,12 +35,14 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Listar todos os usuários' })
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Buscar usuário por ID' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
@@ -49,6 +50,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Atualizar usuário' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -58,6 +60,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Remover usuário' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
