@@ -14,10 +14,9 @@ enum MovementType {
 }
 
 enum ProductType {
-  MONOCRYSTALLINE
-  POLYCRYSTALLINE
-  THIN_FILM
-  BIFACIAL
+  SOLAR_PANEL
+  INVERTER
+  STRUCTURE
 }
 
 model User {
@@ -40,26 +39,25 @@ model Category {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  products Product[]
-
   @@map("categories")
 }
 
 model Product {
-  id          String      @id @default(uuid())
-  code        String      @unique
-  name        String
-  description String?
-  brand       String
-  type        ProductType
-  wattage     Int?
-  categoryId  String      @map("category_id")
-  price       Decimal     @db.Decimal(10, 2)
-  quantity    Int         @default(0)
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  id             String      @id @default(uuid())
+  code           String      @unique @default(uuid())
+  name           String
+  vendor         String
+  customer       String?
+  purchaseDate   DateTime    @map("purchase_date")
+  entryStockDate DateTime    @default(now()) @updatedAt @map("entry_stock_date")
+  quantity       Int         @default(0)
+  cost           Decimal     @db.Decimal(10, 2)
+  type           ProductType
+  description    String?
+  image          String?
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
 
-  category  Category            @relation(fields: [categoryId], references: [id])
   movements InventoryMovement[]
 
   @@map("products")
