@@ -17,29 +17,16 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateProductDto) {
-    const existing = await this.prisma.product.findUnique({
-      where: { code: dto.code },
-    });
-    if (existing)
-      throw new ConflictException('Já existe um produto com este código');
-
-    const category = await this.prisma.category.findUnique({
-      where: { id: dto.categoryId },
-    });
-    if (!category) throw new NotFoundException('Categoria não encontrada');
-
     return this.prisma.product.create({
       data: {
         ...dto,
-        price: new Prisma.Decimal(dto.price),
+        cost: new Prisma.Decimal(dto.cost),
       },
-      include: { category: true },
     });
   }
 
   async findAll(filter: FilterProductsDto) {
-    const { search, brand, type, categoryId, code, lowStock, page, limit } =
-      filter;
+    const { search, vendor, type, code, lowStock, page, limit } = filter;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ProductWhereInput = {
@@ -47,13 +34,12 @@ export class ProductsService {
         OR: [
           { name: { contains: search, mode: 'insensitive' } },
           { code: { contains: search, mode: 'insensitive' } },
-          { brand: { contains: search, mode: 'insensitive' } },
+          { vendor: { contains: search, mode: 'insensitive' } },
           { description: { contains: search, mode: 'insensitive' } },
         ],
       }),
-      ...(brand && { brand: { contains: brand, mode: 'insensitive' } }),
+      ...(vendor && { vendor: { contains: vendor, mode: 'insensitive' } }),
       ...(type && { type: type }),
-      ...(categoryId && { categoryId }),
       ...(code && { code: { contains: code, mode: 'insensitive' } }),
       ...(lowStock && { quantity: { lte: LOW_STOCK_THRESHOLD } }),
     };
@@ -62,7 +48,6 @@ export class ProductsService {
       this.prisma.product.count({ where }),
       this.prisma.product.findMany({
         where,
-        include: { category: true },
         orderBy: { name: 'asc' },
         skip,
         take: limit,
@@ -85,7 +70,6 @@ export class ProductsService {
   async findOne(id: string) {
     const product = await this.prisma.product.findUnique({
       where: { id },
-      include: { category: true },
     });
     if (!product) throw new NotFoundException('Produto não encontrado');
     return product;
@@ -94,7 +78,6 @@ export class ProductsService {
   async findByCode(code: string) {
     const product = await this.prisma.product.findUnique({
       where: { code },
-      include: { category: true },
     });
     if (!product) throw new NotFoundException('Produto não encontrado');
     return product;
@@ -121,22 +104,14 @@ export class ProductsService {
   async update(id: string, dto: UpdateProductDto) {
     await this.findOne(id);
 
-    if (dto.categoryId) {
-      const category = await this.prisma.category.findUnique({
-        where: { id: dto.categoryId },
-      });
-      if (!category) throw new NotFoundException('Categoria não encontrada');
-    }
-
     return this.prisma.product.update({
       where: { id },
       data: {
         ...dto,
-        ...(dto.price !== undefined && {
-          price: new Prisma.Decimal(dto.price),
+        ...(dto.cost !== undefined && {
+          cost: new Prisma.Decimal(dto.cost),
         }),
       },
-      include: { category: true },
     });
   }
 
@@ -157,11 +132,11 @@ export class ProductsService {
     return { message: `Produto "${product.name}" removido com sucesso` };
   }
 
-  async getBrands() {
-    const brands = await this.prisma.product.groupBy({
-      by: ['brand'],
-      orderBy: { brand: 'asc' },
+  async getVendors() {
+    const vendors = await this.prisma.product.groupBy({
+      by: ['vendor'],
+      orderBy: { vendor: 'asc' },
     });
-    return brands.map((b) => b.brand);
+    return vendors.map((b) => b.vendor);
   }
 }

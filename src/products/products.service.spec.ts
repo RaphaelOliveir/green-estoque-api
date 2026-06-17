@@ -14,18 +14,19 @@ const mockCategory = { id: 'cat-1', name: 'Residencial' };
 
 const mockProduct = {
   id: 'prod-1',
-  code: 'CS-MONO-400W',
+  code: 'uuid-code-123',
   name: 'Canadian Solar 400W',
-  description: null,
-  brand: 'Canadian Solar',
-  type: ProductType.MONOCRYSTALLINE,
-  wattage: 400,
-  categoryId: 'cat-1',
-  price: new Prisma.Decimal(850),
+  vendor: 'Canadian Solar',
+  customer: null,
+  purchaseDate: new Date(),
+  entryStockDate: new Date(),
   quantity: 50,
+  cost: new Prisma.Decimal(850),
+  type: 'SOLAR_PANEL' as any,
+  description: null,
+  image: null,
   createdAt: new Date(),
   updatedAt: new Date(),
-  category: mockCategory,
 };
 
 const mockPrisma = {
@@ -63,57 +64,21 @@ describe('ProductsService', () => {
 
   describe('create', () => {
     it('should create a product successfully', async () => {
-      mockPrisma.product.findUnique.mockResolvedValue(null);
-      mockPrisma.category.findUnique.mockResolvedValue(mockCategory);
       mockPrisma.product.create.mockResolvedValue(mockProduct);
 
       const dto = {
-        code: 'CS-MONO-400W',
         name: 'Canadian Solar 400W',
-        brand: 'Canadian Solar',
-        type: 'MONOCRYSTALLINE' as const,
-        categoryId: 'cat-1',
-        price: 850,
+        vendor: 'Canadian Solar',
+        purchaseDate: new Date(),
+        cost: 850,
         quantity: 50,
+        type: 'SOLAR_PANEL' as const,
       };
 
       const result = await service.create(dto);
 
       expect(result).toEqual(mockProduct);
       expect(mockPrisma.product.create).toHaveBeenCalledOnce();
-    });
-
-    it('should throw ConflictException when code already exists', async () => {
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct);
-
-      await expect(
-        service.create({
-          code: 'CS-MONO-400W',
-          name: 'Duplicate',
-          brand: 'Brand',
-          type: 'MONOCRYSTALLINE' as const,
-          categoryId: 'cat-1',
-          price: 100,
-          quantity: 0,
-        }),
-      ).rejects.toThrow(ConflictException);
-    });
-
-    it('should throw NotFoundException when category does not exist', async () => {
-      mockPrisma.product.findUnique.mockResolvedValue(null);
-      mockPrisma.category.findUnique.mockResolvedValue(null);
-
-      await expect(
-        service.create({
-          code: 'NEW-001',
-          name: 'New Product',
-          brand: 'Brand',
-          type: 'MONOCRYSTALLINE' as const,
-          categoryId: 'non-existent-cat',
-          price: 100,
-          quantity: 0,
-        }),
-      ).rejects.toThrow(NotFoundException);
     });
   });
 

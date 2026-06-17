@@ -13,8 +13,7 @@ export class ReportsService {
       endDate,
       productId,
       type,
-      categoryId,
-      brand,
+      vendor,
       page,
       limit,
     } = query;
@@ -31,9 +30,8 @@ export class ReportsService {
         : {}),
       ...(productId && { productId }),
       ...(type && { type: type }),
-      ...(categoryId && { product: { categoryId } }),
-      ...(brand && {
-        product: { brand: { contains: brand, mode: 'insensitive' as const } },
+      ...(vendor && {
+        product: { vendor: { contains: vendor, mode: 'insensitive' as const } },
       }),
     };
 
@@ -47,8 +45,7 @@ export class ReportsService {
               id: true,
               code: true,
               name: true,
-              brand: true,
-              category: true,
+              vendor: true,
             },
           },
           user: { select: { id: true, name: true } },
@@ -97,7 +94,6 @@ export class ReportsService {
   async getStockReport() {
     const [products, totalProducts] = await Promise.all([
       this.prisma.product.findMany({
-        include: { category: true },
         orderBy: { quantity: 'asc' },
       }),
       this.prisma.product.count(),
@@ -108,14 +104,10 @@ export class ReportsService {
     const normalStock = products.filter((p) => p.quantity > 5);
 
     const totalValue = products.reduce((sum, p) => {
-      return sum + Number(p.price) * p.quantity;
+      return sum + Number(p.cost) * p.quantity;
     }, 0);
 
-    const byCategory = await this.prisma.product.groupBy({
-      by: ['categoryId'],
-      _sum: { quantity: true },
-      _count: true,
-    });
+    // Category grouping removed
 
     return {
       summary: {
@@ -125,7 +117,6 @@ export class ReportsService {
         normalStock: normalStock.length,
         totalStockValue: totalValue.toFixed(2),
       },
-      byCategory,
       products,
     };
   }
@@ -155,7 +146,7 @@ export class ReportsService {
 
     const products = await this.prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, code: true, name: true, brand: true },
+      select: { id: true, code: true, name: true, vendor: true },
     });
 
     const productMap = Object.fromEntries(products.map((p) => [p.id, p]));
