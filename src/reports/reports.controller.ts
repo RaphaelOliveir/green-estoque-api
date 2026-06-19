@@ -36,7 +36,7 @@ export class ReportsController {
     example: '2024-12-31T23:59:59Z',
   })
   @ApiQuery({ name: 'productId', required: false, description: 'Filtrar pelo ID do produto (UUID)' })
-  @ApiQuery({ name: 'type', required: false, enum: ['ENTRY', 'EXIT'], description: 'Filtrar por tipo de movimentação' })
+  @ApiQuery({ name: 'status', required: false, enum: ['EM_ESTOQUE', 'INSTALADO'], description: 'Filtrar por status da unidade' })
   @ApiQuery({ name: 'vendor', required: false, description: 'Filtrar pelo nome do fornecedor' })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número da página (padrão: 1)', example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Itens por página (padrão: 50, máx: 100)', example: 50 })

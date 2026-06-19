@@ -1,71 +1,27 @@
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
-import { MovementType } from '@prisma/client';
+import { ItemStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateMovementDto } from './dto/create-movement.dto';
+import { UpdateItemStatusDto } from './dto/update-item-status.dto';
 
 @Injectable()
 export class InventoryService {
   constructor(private prisma: PrismaService) {}
 
-  async createMovement(dto: CreateMovementDto, userId: string) {
-    const product = await this.prisma.product.findUnique({
-      where: { id: dto.productId },
-    });
-
-    if (!product) {
-      throw new NotFoundException('Produto não encontrado');
-    }
-
-    if (dto.type === MovementType.EXIT && product.quantity < dto.quantity) {
-      throw new BadRequestException(
-        `Estoque insuficiente. Disponível: ${product.quantity}, Solicitado: ${dto.quantity}`,
-      );
-    }
-
-    const quantityDelta =
-      dto.type === MovementType.ENTRY ? dto.quantity : -dto.quantity;
-
-    const [movement] = await this.prisma.$transaction([
-      this.prisma.inventoryMovement.create({
-        data: {
-          productId: dto.productId,
-          type: dto.type,
-          quantity: dto.quantity,
-          reason: dto.reason,
-          userId,
-        },
-        include: {
-          product: { select: { id: true, code: true, name: true } },
-          user: { select: { id: true, name: true } },
-        },
-      }),
-      this.prisma.product.update({
-        where: { id: dto.productId },
-        data: { quantity: { increment: quantityDelta } },
-      }),
-    ]);
-
-    return movement;
-  }
-
   async findAll(params: {
     productId?: string;
-    type?: MovementType;
-    userId?: string;
+    status?: ItemStatus;
     page: number;
     limit: number;
   }) {
-    const { productId, type, userId, page, limit } = params;
+    const { productId, status, page, limit } = params;
     const skip = (page - 1) * limit;
 
     const where = {
       ...(productId && { productId }),
-      ...(type && { type }),
-      ...(userId && { userId }),
+      ...(status && { status }),
     };
 
     const [total, items] = await Promise.all([
@@ -74,9 +30,8 @@ export class InventoryService {
         where,
         include: {
           product: {
-            select: { id: true, code: true, name: true, brand: true },
+            select: { id: true, code: true, name: true, vendor: true },
           },
-          user: { select: { id: true, name: true } },
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -97,42 +52,68 @@ export class InventoryService {
     };
   }
 
-  async findProductHistory(productId: string, page: number, limit: number) {
+  async findOne(id: string) {
+    const item = await this.prisma.inventoryMovement.findUnique({
+      where: { id },
+      include: {
+        product: { select: { id: true, code: true, name: true } },
+      },
+    });
+
+    if (!item) {
+      throw new NotFoundException('Unidade de estoque não encontrada');
+    }
+
+    return item;
+  }
+
+  async updateStatus(id: string, dto: UpdateItemStatusDto) {
+    await this.findOne(id); // Ensure it exists
+
+    return this.prisma.inventoryMovement.update({
+      where: { id },
+      data: {
+        status: dto.status,
+        observations: dto.observations,
+      },
+      include: {
+        product: { select: { id: true, code: true, name: true } },
+      },
+    });
+  }
+
+  async findByProduct(productId: string, page: number, limit: number) {
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
     });
-    if (!product) throw new NotFoundException('Produto não encontrado');
+    
+    if (!product) {
+      throw new NotFoundException('Produto não encontrado');
+    }
 
     const skip = (page - 1) * limit;
 
-    const [total, movements] = await Promise.all([
+    const [total, items] = await Promise.all([
       this.prisma.inventoryMovement.count({ where: { productId } }),
       this.prisma.inventoryMovement.findMany({
         where: { productId },
-        include: { user: { select: { id: true, name: true } } },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
     ]);
 
-    const totalEntries = movements
-      .filter((m) => m.type === MovementType.ENTRY)
-      .reduce((sum, m) => sum + m.quantity, 0);
-
-    const totalExits = movements
-      .filter((m) => m.type === MovementType.EXIT)
-      .reduce((sum, m) => sum + m.quantity, 0);
+    const totalEmEstoque = items.filter((m) => m.status === 'EM_ESTOQUE').length;
+    const totalInstalado = items.filter((m) => m.status === 'INSTALADO').length;
 
     return {
       product: {
         id: product.id,
         code: product.code,
         name: product.name,
-        currentQuantity: product.quantity,
       },
-      summary: { totalEntries, totalExits },
-      movements,
+      summary: { totalEmEstoque, totalInstalado },
+      units: items,
       meta: {
         total,
         page,

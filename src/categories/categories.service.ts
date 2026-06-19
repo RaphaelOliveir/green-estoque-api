@@ -24,14 +24,12 @@ export class CategoriesService {
   findAll() {
     return this.prisma.category.findMany({
       orderBy: { name: 'asc' },
-      include: { _count: { select: { products: true } } },
     });
   }
 
   async findOne(id: string) {
     const category = await this.prisma.category.findUnique({
       where: { id },
-      include: { _count: { select: { products: true } } },
     });
     if (!category) throw new NotFoundException('Categoria não encontrada');
     return category;
@@ -52,13 +50,7 @@ export class CategoriesService {
   }
 
   async remove(id: string) {
-    const category = await this.findOne(id);
-
-    if (category._count.products > 0) {
-      throw new ConflictException(
-        'Não é possível remover uma categoria com produtos cadastrados',
-      );
-    }
+    await this.findOne(id);
 
     await this.prisma.category.delete({ where: { id } });
     return { message: 'Categoria removida com sucesso' };

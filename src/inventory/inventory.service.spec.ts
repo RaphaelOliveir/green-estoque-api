@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { MovementType, ProductType } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import { NotFoundException } from '@nestjs/common';
+import { ItemStatus } from '@prisma/client';
 import { InventoryService } from './inventory.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -11,41 +10,28 @@ const mockProduct = {
   code: 'CS-001',
   name: 'Solar Panel 400W',
   vendor: 'Canadian Solar',
-  customer: null,
-  purchaseDate: new Date(),
-  entryStockDate: new Date(),
-  type: 'SOLAR_PANEL' as any,
-  cost: new Prisma.Decimal(850),
-  quantity: 20,
-  description: null,
-  image: null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
 };
 
-const mockMovement = {
-  id: 'mov-1',
+const mockItem = {
+  id: 'item-1',
   productId: 'prod-1',
-  type: MovementType.ENTRY,
-  quantity: 10,
-  reason: 'Purchase',
-  userId: 'user-1',
+  status: ItemStatus.EM_ESTOQUE,
+  observations: null,
   createdAt: new Date(),
-  product: { id: 'prod-1', code: 'CS-001', name: 'Solar Panel 400W' },
-  user: { id: 'user-1', name: 'Test User' },
+  updatedAt: new Date(),
+  product: mockProduct,
 };
 
 const mockPrisma = {
   product: {
     findUnique: vi.fn(),
-    update: vi.fn(),
   },
   inventoryMovement: {
-    create: vi.fn(),
     findMany: vi.fn(),
     count: vi.fn(),
+    findUnique: vi.fn(),
+    update: vi.fn(),
   },
-  $transaction: vi.fn(),
 };
 
 describe('InventoryService', () => {
@@ -63,97 +49,83 @@ describe('InventoryService', () => {
     vi.clearAllMocks();
   });
 
-  describe('createMovement', () => {
-    it('should register an ENTRY movement and update stock', async () => {
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct);
-      mockPrisma.$transaction.mockResolvedValue([
-        mockMovement,
-        { ...mockProduct, quantity: 30 },
-      ]);
+  describe('findAll', () => {
+    it('should return paginated items with meta data', async () => {
+      mockPrisma.inventoryMovement.count.mockResolvedValue(1);
+      mockPrisma.inventoryMovement.findMany.mockResolvedValue([mockItem]);
 
-      const result = await service.createMovement(
-        {
-          productId: 'prod-1',
-          type: 'ENTRY',
-          quantity: 10,
-          reason: 'Purchase',
-        },
-        'user-1',
-      );
+      const result = await service.findAll({ page: 1, limit: 10 });
 
-      expect(result).toEqual(mockMovement);
-      expect(mockPrisma.$transaction).toHaveBeenCalledOnce();
-    });
-
-    it('should register an EXIT movement when stock is sufficient', async () => {
-      const exitMovement = {
-        ...mockMovement,
-        type: MovementType.EXIT,
-        quantity: 5,
-      };
-      mockPrisma.product.findUnique.mockResolvedValue(mockProduct);
-      mockPrisma.$transaction.mockResolvedValue([
-        exitMovement,
-        { ...mockProduct, quantity: 15 },
-      ]);
-
-      const result = await service.createMovement(
-        { productId: 'prod-1', type: 'EXIT', quantity: 5 },
-        'user-1',
-      );
-
-      expect(result.type).toBe(MovementType.EXIT);
-    });
-
-    it('should throw NotFoundException when product does not exist', async () => {
-      mockPrisma.product.findUnique.mockResolvedValue(null);
-
-      await expect(
-        service.createMovement(
-          { productId: 'non-existent', type: 'EXIT', quantity: 1 },
-          'user-1',
-        ),
-      ).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw BadRequestException when stock is insufficient for EXIT', async () => {
-      mockPrisma.product.findUnique.mockResolvedValue({
-        ...mockProduct,
-        quantity: 5,
-      });
-
-      await expect(
-        service.createMovement(
-          { productId: 'prod-1', type: 'EXIT', quantity: 10 },
-          'user-1',
-        ),
-      ).rejects.toThrow(BadRequestException);
+      expect(result.data).toHaveLength(1);
+      expect(result.meta.total).toBe(1);
+      expect(result.data[0]).toEqual(mockItem);
     });
   });
 
-  describe('findProductHistory', () => {
+  describe('findOne', () => {
+    it('should find and return an item', async () => {
+      mockPrisma.inventoryMovement.findUnique.mockResolvedValue(mockItem);
+
+      const result = await service.findOne('item-1');
+
+      expect(result).toEqual(mockItem);
+    });
+
+    it('should throw NotFoundException if item does not exist', async () => {
+      mockPrisma.inventoryMovement.findUnique.mockResolvedValue(null);
+
+      await expect(service.findOne('non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('updateStatus', () => {
+    it('should update item status', async () => {
+      mockPrisma.inventoryMovement.findUnique.mockResolvedValue(mockItem);
+      mockPrisma.inventoryMovement.update.mockResolvedValue({
+        ...mockItem,
+        status: ItemStatus.INSTALADO,
+      });
+
+      const result = await service.updateStatus('item-1', {
+        status: ItemStatus.INSTALADO,
+      });
+
+      expect(result.status).toBe(ItemStatus.INSTALADO);
+      expect(mockPrisma.inventoryMovement.update).toHaveBeenCalledWith({
+        where: { id: 'item-1' },
+        data: { status: ItemStatus.INSTALADO, observations: undefined },
+        include: {
+          product: { select: { id: true, code: true, name: true } },
+        },
+      });
+    });
+  });
+
+  describe('findByProduct', () => {
     it('should return product history with summary', async () => {
       mockPrisma.product.findUnique.mockResolvedValue(mockProduct);
       mockPrisma.inventoryMovement.count.mockResolvedValue(2);
       mockPrisma.inventoryMovement.findMany.mockResolvedValue([
-        { ...mockMovement, type: MovementType.ENTRY, quantity: 10 },
-        { ...mockMovement, id: 'mov-2', type: MovementType.EXIT, quantity: 5 },
+        { ...mockItem, status: ItemStatus.EM_ESTOQUE },
+        { ...mockItem, id: 'item-2', status: ItemStatus.INSTALADO },
       ]);
 
-      const result = await service.findProductHistory('prod-1', 1, 20);
+      const result = await service.findByProduct('prod-1', 1, 20);
 
       expect(result).toHaveProperty('product');
-      expect(result).toHaveProperty('movements');
+      expect(result).toHaveProperty('units');
       expect(result).toHaveProperty('summary');
-      expect(result.summary.totalEntries).toBe(10);
-      expect(result.summary.totalExits).toBe(5);
+      expect(result.summary.totalEmEstoque).toBe(1);
+      expect(result.summary.totalInstalado).toBe(1);
     });
 
     it('should throw NotFoundException when product does not exist', async () => {
       mockPrisma.product.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.findProductHistory('non-existent', 1, 20),
+        service.findByProduct('non-existent', 1, 20),
       ).rejects.toThrow(NotFoundException);
     });
   });

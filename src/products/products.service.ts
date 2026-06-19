@@ -26,7 +26,7 @@ export class ProductsService {
   }
 
   async findAll(filter: FilterProductsDto) {
-    const { search, vendor, type, code, lowStock, page, limit } = filter;
+    const { search, vendor, type, code, page, limit } = filter;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ProductWhereInput = {
@@ -41,7 +41,6 @@ export class ProductsService {
       ...(vendor && { vendor: { contains: vendor, mode: 'insensitive' } }),
       ...(type && { type: type }),
       ...(code && { code: { contains: code, mode: 'insensitive' } }),
-      ...(lowStock && { quantity: { lte: LOW_STOCK_THRESHOLD } }),
     };
 
     const [total, items] = await Promise.all([
@@ -90,14 +89,27 @@ export class ProductsService {
         id: true,
         code: true,
         name: true,
-        quantity: true,
         updatedAt: true,
+        _count: {
+          select: {
+            movements: {
+              where: { status: 'EM_ESTOQUE' },
+            },
+          },
+        },
       },
     });
     if (!product) throw new NotFoundException('Produto não encontrado');
+    
+    const quantity = product._count.movements;
+    
     return {
-      ...product,
-      isLowStock: product.quantity <= LOW_STOCK_THRESHOLD,
+      id: product.id,
+      code: product.code,
+      name: product.name,
+      updatedAt: product.updatedAt,
+      quantity,
+      isLowStock: quantity <= LOW_STOCK_THRESHOLD,
     };
   }
 
@@ -118,17 +130,24 @@ export class ProductsService {
   async remove(id: string) {
     const product = await this.findOne(id);
 
-    const movementsCount = await this.prisma.inventoryMovement.count({
-      where: { productId: id },
+    const installedUnits = await this.prisma.inventoryMovement.count({
+      where: { productId: id, status: 'INSTALADO' },
     });
 
-    if (movementsCount > 0) {
+    if (installedUnits > 0) {
       throw new BadRequestException(
-        'Não é possível remover um produto com movimentações registradas',
+        'Não é possível remover um produto com unidades instaladas',
       );
     }
 
-    await this.prisma.product.delete({ where: { id } });
+    // Use a transaction to safely delete all EM_ESTOQUE units and then the product
+    await this.prisma.$transaction(async (tx) => {
+      await tx.inventoryMovement.deleteMany({
+        where: { productId: id },
+      });
+      await tx.product.delete({ where: { id } });
+    });
+    
     return { message: `Produto "${product.name}" removido com sucesso` };
   }
 

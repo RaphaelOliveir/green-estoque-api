@@ -36,7 +36,7 @@ export class ProductsController {
   @ApiOperation({
     summary: 'Cadastrar novo produto',
     description:
-      'Cria um novo produto no estoque. O código (UUID) é gerado automaticamente. A data de entrada em estoque (entryStockDate) também é definida automaticamente.',
+      'Cria um novo produto no estoque. O código (UUID) é gerado automaticamente. A data de entrada em estoque (entryStockDate) também é definida automaticamente. O estoque inicial deve ser gerenciado separadamente via movimentações de inventário.',
   })
   @ApiBody({ type: CreateProductDto, description: 'Dados do produto a ser cadastrado' })
   @ApiResponse({
@@ -77,12 +77,7 @@ export class ProductsController {
     required: false,
     description: 'Filtrar pelo código UUID do produto',
   })
-  @ApiQuery({
-    name: 'lowStock',
-    required: false,
-    description: 'true = retorna apenas produtos com estoque ≤ 5 unidades',
-    example: 'true',
-  })
+
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número da página (padrão: 1)', example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Itens por página (padrão: 20, máx: 100)', example: 20 })
   @ApiResponse({
@@ -145,7 +140,7 @@ export class ProductsController {
   @Get(':id/stock')
   @ApiOperation({
     summary: 'Verificar estoque disponível em tempo real',
-    description: 'Retorna a quantidade atual em estoque do produto e indica se está com estoque baixo (≤ 5 unidades).',
+    description: 'Retorna a quantidade atual em estoque do produto (calculada dinamicamente com base nas unidades disponíveis) e indica se está com estoque baixo (≤ 5 unidades).',
   })
   @ApiParam({
     name: 'id',
@@ -154,7 +149,7 @@ export class ProductsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Retorna id, code, name, quantity, updatedAt e isLowStock do produto.',
+    description: 'Retorna id, code, name, updatedAt, quantity (calculado via movimentações com status EM_ESTOQUE) e isLowStock do produto.',
   })
   @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
   @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido' })
