@@ -32,7 +32,7 @@ Inclua o token no header: \`Authorization: Bearer <token>\`
     .addBearerAuth()
     .addTag('Auth', 'Autenticação e perfil do usuário')
     .addTag('Usuários', 'Gerenciamento de usuários')
-    .addTag('Categorias', 'Gerenciamento de categorias de produtos')
+
     .addTag('Produtos', 'Cadastro e consulta de painéis solares')
     .addTag('Estoque / Unidades Físicas', 'Gerenciamento de unidades físicas individuais em estoque')
     .addTag('Relatórios', 'Relatórios e análises')

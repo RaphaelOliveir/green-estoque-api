@@ -43,7 +43,6 @@ export class ReportsService {
           product: {
             select: {
               id: true,
-              code: true,
               name: true,
               vendor: true,
             },
@@ -106,15 +105,15 @@ export class ReportsService {
     const productsWithQty = products.map((p) => {
       const quantity = p._count.movements;
       return {
-        id: p.id,
-        code: p.code,
-        name: p.name,
-        vendor: p.vendor,
+          id: p.id,
+          name: p.name,
+          vendor: p.vendor,
         customer: p.customer,
         purchaseDate: p.purchaseDate,
         entryStockDate: p.entryStockDate,
         cost: p.cost,
         type: p.type,
+        code: p.code,
         description: p.description,
         image: p.image,
         createdAt: p.createdAt,

@@ -26,30 +26,11 @@ async function main() {
     },
   });
 
-  await prisma.category.upsert({
-    where: { name: 'Residencial' },
-    update: {},
-    create: { name: 'Residencial', description: 'Painéis para uso residencial' },
-  });
-
-  await prisma.category.upsert({
-    where: { name: 'Comercial' },
-    update: {},
-    create: { name: 'Comercial', description: 'Painéis para uso comercial' },
-  });
-
-  await prisma.category.upsert({
-    where: { name: 'Industrial' },
-    update: {},
-    create: { name: 'Industrial', description: 'Painéis para uso industrial' },
-  });
+  // Categories removed from seed data
 
   // Seed Product 1
-  const p1 = await prisma.product.upsert({
-    where: { code: 'CS-MONO-400W' },
-    update: {},
-    create: {
-      code: 'CS-MONO-400W',
+  const p1 = await prisma.product.create({
+    data: {
       name: 'Painel Solar Canadian Solar 400W',
       description: 'Painel solar monocristalino de alto desempenho 400W',
       vendor: 'Canadian Solar',
@@ -60,11 +41,8 @@ async function main() {
   });
 
   // Seed Product 2
-  const p2 = await prisma.product.upsert({
-    where: { code: 'JK-MONO-550W' },
-    update: {},
-    create: {
-      code: 'JK-MONO-550W',
+  const p2 = await prisma.product.create({
+    data: {
       name: 'Painel Solar Jinko Tiger 550W',
       description: 'Painel solar monocristalino bifacial de alta potência 550W',
       vendor: 'Jinko Solar',
@@ -75,11 +53,8 @@ async function main() {
   });
 
   // Seed Product 3
-  const p3 = await prisma.product.upsert({
-    where: { code: 'LON-POLY-330W' },
-    update: {},
-    create: {
-      code: 'LON-POLY-330W',
+  const p3 = await prisma.product.create({
+    data: {
       name: 'Painel Solar Longi 330W Policristalino',
       description: 'Painel solar policristalino econômico 330W',
       vendor: 'Longi Solar',

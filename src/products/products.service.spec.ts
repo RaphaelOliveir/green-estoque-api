@@ -58,16 +58,14 @@ describe('ProductsService', () => {
   });
 
   describe('create', () => {
-    it('should create a product successfully with units in transaction', async () => {
+    it('should create a product successfully with an initial inventory movement unit', async () => {
       mockPrisma.product.create.mockResolvedValue(mockProduct);
-      mockPrisma.inventoryMovement.createMany.mockResolvedValue({ count: 50 });
 
       const dto = {
         name: 'Canadian Solar 400W',
         vendor: 'Canadian Solar',
         purchaseDate: new Date(),
         cost: 850,
-        quantity: 50,
         type: 'SOLAR_PANEL' as const,
       };
 
@@ -75,9 +73,10 @@ describe('ProductsService', () => {
 
       expect(result).toEqual(mockProduct);
       expect(mockPrisma.product.create).toHaveBeenCalledOnce();
-      expect(mockPrisma.inventoryMovement.createMany).toHaveBeenCalledOnce();
-      const callArgs = mockPrisma.inventoryMovement.createMany.mock.calls[0][0];
-      expect(callArgs.data).toHaveLength(50);
+      
+      const createArgs = mockPrisma.product.create.mock.calls[0][0];
+      expect(createArgs.data.movements.create).toBeDefined();
+      expect(createArgs.data.movements.create.status).toEqual('EM_ESTOQUE');
     });
   });
 

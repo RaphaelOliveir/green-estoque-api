@@ -30,7 +30,7 @@ export class InventoryService {
         where,
         include: {
           product: {
-            select: { id: true, code: true, name: true, vendor: true },
+            select: { id: true, name: true, vendor: true },
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -56,7 +56,7 @@ export class InventoryService {
     const item = await this.prisma.inventoryMovement.findUnique({
       where: { id },
       include: {
-        product: { select: { id: true, code: true, name: true } },
+        product: { select: { id: true, name: true } },
       },
     });
 
@@ -77,7 +77,7 @@ export class InventoryService {
         observations: dto.observations,
       },
       include: {
-        product: { select: { id: true, code: true, name: true } },
+        product: { select: { id: true, name: true } },
       },
     });
   }
@@ -109,7 +109,6 @@ export class InventoryService {
     return {
       product: {
         id: product.id,
-        code: product.code,
         name: product.name,
       },
       summary: { totalEmEstoque, totalInstalado },

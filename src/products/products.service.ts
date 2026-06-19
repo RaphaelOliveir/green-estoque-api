@@ -17,30 +17,47 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateProductDto) {
-    return this.prisma.product.create({
+    const product = await this.prisma.product.create({
       data: {
         ...dto,
         cost: new Prisma.Decimal(dto.cost),
       },
     });
+
+    await this.prisma.inventoryMovement.create({
+      data: {
+        productId: product.id,
+        status: 'EM_ESTOQUE',
+        observations: 'Estoque inicial do produto',
+        name: product.name,
+        vendor: product.vendor,
+        customer: product.customer,
+        purchaseDate: product.purchaseDate,
+        entryStockDate: product.entryStockDate,
+        cost: product.cost,
+        type: product.type,
+        description: product.description,
+        image: product.image,
+      },
+    });
+
+    return product;
   }
 
   async findAll(filter: FilterProductsDto) {
-    const { search, vendor, type, code, page, limit } = filter;
+    const { search, vendor, type, page, limit } = filter;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ProductWhereInput = {
       ...(search && {
         OR: [
           { name: { contains: search, mode: 'insensitive' } },
-          { code: { contains: search, mode: 'insensitive' } },
           { vendor: { contains: search, mode: 'insensitive' } },
           { description: { contains: search, mode: 'insensitive' } },
         ],
       }),
       ...(vendor && { vendor: { contains: vendor, mode: 'insensitive' } }),
       ...(type && { type: type }),
-      ...(code && { code: { contains: code, mode: 'insensitive' } }),
     };
 
     const [total, items] = await Promise.all([
@@ -74,20 +91,13 @@ export class ProductsService {
     return product;
   }
 
-  async findByCode(code: string) {
-    const product = await this.prisma.product.findUnique({
-      where: { code },
-    });
-    if (!product) throw new NotFoundException('Produto não encontrado');
-    return product;
-  }
+  // Removed findByCode as code field is deprecated
 
   async getStock(id: string) {
     const product = await this.prisma.product.findUnique({
       where: { id },
       select: {
         id: true,
-        code: true,
         name: true,
         updatedAt: true,
         _count: {
@@ -105,7 +115,6 @@ export class ProductsService {
     
     return {
       id: product.id,
-      code: product.code,
       name: product.name,
       updatedAt: product.updatedAt,
       quantity,
