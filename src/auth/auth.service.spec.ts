@@ -76,9 +76,9 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should return access_token and user info', async () => {
+    it('should return access_token and user info', () => {
       const { password: _pw, ...userWithoutPassword } = mockUser;
-      const result = await service.login(userWithoutPassword);
+      const result = service.login(userWithoutPassword);
 
       expect(result).toHaveProperty('access_token', 'mock-jwt-token');
       expect(result).toHaveProperty('user');

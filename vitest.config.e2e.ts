@@ -1,12 +1,13 @@
 import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
+import * as path from 'path';
 
 export default defineConfig({
   test: {
     globals: true,
     include: ['test/**/*.e2e-spec.ts'],
     alias: {
-      '@': new URL('./src', import.meta.url).pathname,
+      '@': path.resolve(__dirname, './src'),
     },
     hookTimeout: 30000,
     testTimeout: 30000,

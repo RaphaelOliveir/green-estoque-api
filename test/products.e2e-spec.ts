@@ -42,7 +42,6 @@ describe('Products (e2e)', () => {
       .send({ email: 'admin-prod-test@test.com', password: 'Admin@1234' });
 
     adminToken = loginRes.body.access_token as string;
-
   });
 
   afterAll(async () => {

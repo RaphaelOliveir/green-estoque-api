@@ -1,10 +1,9 @@
 import {
   Injectable,
   NotFoundException,
-  ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { Prisma, ProductType } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -110,9 +109,9 @@ export class ProductsService {
       },
     });
     if (!product) throw new NotFoundException('Produto não encontrado');
-    
+
     const quantity = product._count.movements;
-    
+
     return {
       id: product.id,
       name: product.name,
@@ -156,7 +155,7 @@ export class ProductsService {
       });
       await tx.product.delete({ where: { id } });
     });
-    
+
     return { message: `Produto "${product.name}" removido com sucesso` };
   }
 

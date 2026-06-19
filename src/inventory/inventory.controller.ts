@@ -32,19 +32,42 @@ export class InventoryController {
   @Get('units')
   @ApiOperation({
     summary: 'Listar unidades de estoque com filtros e paginação',
-    description: 'Retorna uma lista paginada de unidades individuais, com filtros opcionais por produto e status.',
+    description:
+      'Retorna uma lista paginada de unidades individuais, com filtros opcionais por produto e status.',
   })
-  @ApiQuery({ name: 'productId', required: false, description: 'Filtrar pelo ID do produto (UUID)' })
+  @ApiQuery({
+    name: 'productId',
+    required: false,
+    description: 'Filtrar pelo ID do produto (UUID)',
+  })
   @ApiQuery({
     name: 'status',
     required: false,
     enum: ['EM_ESTOQUE', 'INSTALADO'],
     description: 'Filtrar por status da unidade',
   })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número da página (padrão: 1)', example: 1 })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Itens por página (padrão: 20)', example: 20 })
-  @ApiResponse({ status: 200, description: 'Lista de unidades retornada com sucesso.' })
-  @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido.' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número da página (padrão: 1)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Itens por página (padrão: 20)',
+    example: 20,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de unidades retornada com sucesso.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado — token JWT ausente ou inválido.',
+  })
   findAll(
     @Query('productId') productId?: string,
     @Query('status') status?: ItemStatus,
@@ -62,7 +85,8 @@ export class InventoryController {
   @Get('items/:id')
   @ApiOperation({
     summary: 'Buscar detalhes de uma unidade específica',
-    description: 'Retorna os detalhes de uma unidade individual de estoque pelo seu ID.',
+    description:
+      'Retorna os detalhes de uma unidade individual de estoque pelo seu ID.',
   })
   @ApiParam({
     name: 'id',
@@ -77,7 +101,8 @@ export class InventoryController {
   @Patch('items/:id')
   @ApiOperation({
     summary: 'Atualizar status de uma unidade',
-    description: 'Atualiza o status (EM_ESTOQUE, INSTALADO) e/ou as observações de uma unidade de estoque.',
+    description:
+      'Atualiza o status (EM_ESTOQUE, INSTALADO) e/ou as observações de uma unidade de estoque.',
   })
   @ApiParam({
     name: 'id',
@@ -96,14 +121,27 @@ export class InventoryController {
   @Get('products/:id/units')
   @ApiOperation({
     summary: 'Listar unidades de um produto',
-    description: 'Retorna todas as unidades de um produto específico, agrupadas e com sumário de quantidades.',
+    description:
+      'Retorna todas as unidades de um produto específico, agrupadas e com sumário de quantidades.',
   })
   @ApiParam({
     name: 'id',
     description: 'ID único do produto (UUID)',
   })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número da página (padrão: 1)', example: 1 })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Itens por página (padrão: 20)', example: 20 })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número da página (padrão: 1)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Itens por página (padrão: 20)',
+    example: 20,
+  })
   @ApiResponse({ status: 200, description: 'Unidades retornadas com sucesso.' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
   findByProduct(

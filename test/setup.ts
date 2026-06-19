@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { beforeAll, afterAll, describe, it, expect } from 'vitest';
+import { beforeAll, afterAll } from 'vitest';
 
 const prisma = new PrismaClient({
   datasources: {
@@ -14,7 +14,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await prisma.inventoryMovement.deleteMany();
   await prisma.product.deleteMany();
-    // await prisma.category.deleteMany(); // Categories removed
+  // await prisma.category.deleteMany(); // Categories removed
   await prisma.user.deleteMany();
   await prisma.$disconnect();
 });

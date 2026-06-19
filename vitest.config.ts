@@ -1,5 +1,6 @@
 import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
+import * as path from 'path';
 
 export default defineConfig({
   test: {
@@ -7,7 +8,7 @@ export default defineConfig({
     root: './',
     include: ['src/**/*.spec.ts'],
     alias: {
-      '@': new URL('./src', import.meta.url).pathname,
+      '@': path.resolve(__dirname, './src'),
     },
   },
   plugins: [
