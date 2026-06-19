@@ -11,7 +11,7 @@ describe('Products (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let adminToken: string;
-  let categoryId: string;
+  // let categoryId: string; // Category removed
   let productId: string;
 
   beforeAll(async () => {
@@ -43,13 +43,6 @@ describe('Products (e2e)', () => {
 
     adminToken = loginRes.body.access_token as string;
 
-    const category = await prisma.category.create({
-      data: {
-        name: `Test Category ${Date.now()}`,
-        description: 'E2E test category',
-      },
-    });
-    categoryId = category.id;
   });
 
   afterAll(async () => {
@@ -59,7 +52,7 @@ describe('Products (e2e)', () => {
       });
       await prisma.product.delete({ where: { id: productId } });
     }
-    await prisma.category.delete({ where: { id: categoryId } });
+    // Category deletion removed
     await prisma.user.deleteMany({
       where: { email: 'admin-prod-test@test.com' },
     });
@@ -76,7 +69,6 @@ describe('Products (e2e)', () => {
           vendor: 'Vendor E2E',
           type: 'SOLAR_PANEL',
           cost: 850.0,
-          quantity: 10,
           purchaseDate: new Date().toISOString(),
         })
         .expect(201);
@@ -89,7 +81,7 @@ describe('Products (e2e)', () => {
       const unitsCount = await prisma.inventoryMovement.count({
         where: { productId },
       });
-      expect(unitsCount).toBe(10);
+      expect(unitsCount).toBe(1);
     });
 
     it('should fail with invalid type', async () => {

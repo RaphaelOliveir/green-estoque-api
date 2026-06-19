@@ -14,10 +14,8 @@ const FilterProductsSchema = z.object({
     .enum(['SOLAR_PANEL', 'INVERTER', 'STRUCTURE'])
     .optional()
     .describe('Filtrar por tipo: SOLAR_PANEL, INVERTER ou STRUCTURE'),
-  code: z
-    .string()
-    .optional()
-    .describe('Filtrar pelo código único do produto (UUID)'),
+    // code filter removed
+
 
   page: z
     .string()

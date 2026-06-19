@@ -36,7 +36,7 @@ export class ProductsController {
   @ApiOperation({
     summary: 'Cadastrar novo produto',
     description:
-      'Cria um novo produto no estoque. O código (UUID) é gerado automaticamente. A data de entrada em estoque (entryStockDate) também é definida automaticamente. O estoque inicial deve ser gerenciado separadamente via movimentações de inventário.',
+      'Cria um novo produto no estoque. O código (UUID) é gerado automaticamente. A data de entrada em estoque (entryStockDate) também é definida automaticamente. Uma movimentação de inventário inicial (EM_ESTOQUE) é criada automaticamente.',
   })
   @ApiBody({ type: CreateProductDto, description: 'Dados do produto a ser cadastrado' })
   @ApiResponse({
@@ -103,22 +103,7 @@ export class ProductsController {
     return this.productsService.getVendors();
   }
 
-  @Get('code/:code')
-  @ApiOperation({
-    summary: 'Buscar produto por código',
-    description: 'Busca um produto específico pelo seu código único (UUID gerado automaticamente).',
-  })
-  @ApiParam({
-    name: 'code',
-    description: 'Código UUID único do produto',
-    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-  })
-  @ApiResponse({ status: 200, description: 'Produto encontrado com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Produto não encontrado para o código informado.' })
-  @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido' })
-  findByCode(@Param('code') code: string) {
-    return this.productsService.findByCode(code);
-  }
+
 
   @Get(':id')
   @ApiOperation({
