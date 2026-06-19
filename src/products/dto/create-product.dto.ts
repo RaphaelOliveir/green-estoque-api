@@ -26,11 +26,6 @@ const CreateProductSchema = z
       .datetime({ message: 'Data de compra deve estar no formato ISO 8601 (ex: 2024-01-15T00:00:00.000Z)' })
       .transform((v) => new Date(v))
       .describe('Data de compra do produto (ISO 8601, ex: 2024-01-15T00:00:00.000Z)'),
-    quantity: z
-      .number()
-      .int()
-      .min(1, 'Quantidade deve ser no mínimo 1')
-      .describe('Quantidade em estoque (mínimo: 1)'),
     cost: z
       .number()
       .positive('Custo deve ser positivo')

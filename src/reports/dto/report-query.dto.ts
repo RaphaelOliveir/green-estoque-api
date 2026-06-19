@@ -19,10 +19,10 @@ const ReportQuerySchema = z.object({
     .uuid()
     .optional()
     .describe('Filtrar pelo ID do produto (UUID)'),
-  type: z
-    .enum(['ENTRY', 'EXIT'])
+  status: z
+    .enum(['EM_ESTOQUE', 'INSTALADO'])
     .optional()
-    .describe("Filtrar por tipo: ENTRY (entradas) ou EXIT (saídas)"),
+    .describe("Filtrar por status: EM_ESTOQUE (em estoque) ou INSTALADO (instalado)"),
   vendor: z
     .string()
     .optional()

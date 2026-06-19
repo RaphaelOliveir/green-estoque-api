@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MovementType, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReportQueryDto } from './dto/report-query.dto';
 
@@ -12,7 +12,7 @@ export class ReportsService {
       startDate,
       endDate,
       productId,
-      type,
+      status,
       vendor,
       page,
       limit,
@@ -29,7 +29,7 @@ export class ReportsService {
           }
         : {}),
       ...(productId && { productId }),
-      ...(type && { type: type }),
+      ...(status && { status }),
       ...(vendor && {
         product: { vendor: { contains: vendor, mode: 'insensitive' as const } },
       }),
@@ -48,7 +48,6 @@ export class ReportsService {
               vendor: true,
             },
           },
-          user: { select: { id: true, name: true } },
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -57,26 +56,23 @@ export class ReportsService {
     ]);
 
     const totals = await this.prisma.inventoryMovement.groupBy({
-      by: ['type'],
+      by: ['status'],
       where,
-      _sum: { quantity: true },
       _count: true,
     });
 
-    const entriesTotal = totals.find((t) => t.type === MovementType.ENTRY);
-    const exitsTotal = totals.find((t) => t.type === MovementType.EXIT);
+    const inStockTotal = totals.find((t) => t.status === 'EM_ESTOQUE');
+    const installedTotal = totals.find((t) => t.status === 'INSTALADO');
 
     return {
       summary: {
         period: { startDate, endDate },
         totalMovements: total,
-        entries: {
-          count: entriesTotal?._count ?? 0,
-          totalQuantity: entriesTotal?._sum.quantity ?? 0,
+        inStock: {
+          count: inStockTotal?._count ?? 0,
         },
-        exits: {
-          count: exitsTotal?._count ?? 0,
-          totalQuantity: exitsTotal?._sum.quantity ?? 0,
+        installed: {
+          count: installedTotal?._count ?? 0,
         },
       },
       data: movements,
@@ -94,20 +90,48 @@ export class ReportsService {
   async getStockReport() {
     const [products, totalProducts] = await Promise.all([
       this.prisma.product.findMany({
-        orderBy: { quantity: 'asc' },
+        include: {
+          _count: {
+            select: {
+              movements: {
+                where: { status: 'EM_ESTOQUE' },
+              },
+            },
+          },
+        },
       }),
       this.prisma.product.count(),
     ]);
 
-    const outOfStock = products.filter((p) => p.quantity === 0);
-    const lowStock = products.filter((p) => p.quantity > 0 && p.quantity <= 5);
-    const normalStock = products.filter((p) => p.quantity > 5);
+    const productsWithQty = products.map((p) => {
+      const quantity = p._count.movements;
+      return {
+        id: p.id,
+        code: p.code,
+        name: p.name,
+        vendor: p.vendor,
+        customer: p.customer,
+        purchaseDate: p.purchaseDate,
+        entryStockDate: p.entryStockDate,
+        cost: p.cost,
+        type: p.type,
+        description: p.description,
+        image: p.image,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+        quantity,
+      };
+    });
 
-    const totalValue = products.reduce((sum, p) => {
+    productsWithQty.sort((a, b) => a.quantity - b.quantity);
+
+    const outOfStock = productsWithQty.filter((p) => p.quantity === 0);
+    const lowStock = productsWithQty.filter((p) => p.quantity > 0 && p.quantity <= 5);
+    const normalStock = productsWithQty.filter((p) => p.quantity > 5);
+
+    const totalValue = productsWithQty.reduce((sum, p) => {
       return sum + Number(p.cost) * p.quantity;
     }, 0);
-
-    // Category grouping removed
 
     return {
       summary: {
@@ -117,26 +141,23 @@ export class ReportsService {
         normalStock: normalStock.length,
         totalStockValue: totalValue.toFixed(2),
       },
-      products,
+      products: productsWithQty,
     };
   }
 
   async getTopMovedProducts(limit = 10) {
     const topEntered = await this.prisma.inventoryMovement.groupBy({
       by: ['productId'],
-      where: { type: MovementType.ENTRY },
-      _sum: { quantity: true },
       _count: true,
-      orderBy: { _sum: { quantity: 'desc' } },
+      orderBy: { _count: { productId: 'desc' } },
       take: limit,
     });
 
     const topExited = await this.prisma.inventoryMovement.groupBy({
       by: ['productId'],
-      where: { type: MovementType.EXIT },
-      _sum: { quantity: true },
+      where: { status: 'INSTALADO' },
       _count: true,
-      orderBy: { _sum: { quantity: 'desc' } },
+      orderBy: { _count: { productId: 'desc' } },
       take: limit,
     });
 
@@ -154,12 +175,12 @@ export class ReportsService {
     return {
       topEntries: topEntered.map((t) => ({
         product: productMap[t.productId],
-        totalQuantity: t._sum.quantity,
+        totalQuantity: t._count,
         movementsCount: t._count,
       })),
       topExits: topExited.map((t) => ({
         product: productMap[t.productId],
-        totalQuantity: t._sum.quantity,
+        totalQuantity: t._count,
         movementsCount: t._count,
       })),
     };

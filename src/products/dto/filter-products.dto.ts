@@ -18,11 +18,7 @@ const FilterProductsSchema = z.object({
     .string()
     .optional()
     .describe('Filtrar pelo código único do produto (UUID)'),
-  lowStock: z
-    .string()
-    .transform((v) => v === 'true')
-    .optional()
-    .describe('Filtrar apenas produtos com estoque baixo (≤ 5 unidades)'),
+
   page: z
     .string()
     .transform((v) => parseInt(v, 10))

@@ -26,12 +26,7 @@ const UpdateProductSchema = z
       .transform((v) => new Date(v))
       .optional()
       .describe('Data de compra do produto (ISO 8601, ex: 2024-01-15T00:00:00.000Z)'),
-    quantity: z
-      .number()
-      .int()
-      .min(1, 'Quantidade deve ser no mínimo 1')
-      .optional()
-      .describe('Quantidade em estoque (mínimo: 1)'),
+
     cost: z
       .number()
       .positive()

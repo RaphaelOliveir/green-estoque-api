@@ -2,15 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   NotFoundException,
-  ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { ProductType } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { ProductsService } from './products.service';
 import { PrismaService } from '../prisma/prisma.service';
-
-const mockCategory = { id: 'cat-1', name: 'Residencial' };
 
 const mockProduct = {
   id: 'prod-1',
@@ -20,7 +16,6 @@ const mockProduct = {
   customer: null,
   purchaseDate: new Date(),
   entryStockDate: new Date(),
-  quantity: 50,
   cost: new Prisma.Decimal(850),
   type: 'SOLAR_PANEL' as any,
   description: null,
@@ -39,12 +34,12 @@ const mockPrisma = {
     count: vi.fn(),
     groupBy: vi.fn(),
   },
-  category: {
-    findUnique: vi.fn(),
-  },
   inventoryMovement: {
     count: vi.fn(),
+    createMany: vi.fn(),
+    deleteMany: vi.fn(),
   },
+  $transaction: vi.fn((callback) => callback(mockPrisma)),
 };
 
 describe('ProductsService', () => {
@@ -63,8 +58,9 @@ describe('ProductsService', () => {
   });
 
   describe('create', () => {
-    it('should create a product successfully', async () => {
+    it('should create a product successfully with units in transaction', async () => {
       mockPrisma.product.create.mockResolvedValue(mockProduct);
+      mockPrisma.inventoryMovement.createMany.mockResolvedValue({ count: 50 });
 
       const dto = {
         name: 'Canadian Solar 400W',
@@ -79,6 +75,9 @@ describe('ProductsService', () => {
 
       expect(result).toEqual(mockProduct);
       expect(mockPrisma.product.create).toHaveBeenCalledOnce();
+      expect(mockPrisma.inventoryMovement.createMany).toHaveBeenCalledOnce();
+      const callArgs = mockPrisma.inventoryMovement.createMany.mock.calls[0][0];
+      expect(callArgs.data).toHaveLength(50);
     });
   });
 
@@ -101,54 +100,53 @@ describe('ProductsService', () => {
   });
 
   describe('getStock', () => {
-    it('should return stock info with isLowStock flag', async () => {
-      const lowStockProduct = {
-        id: 'prod-1',
-        code: 'CS-001',
-        name: 'Product',
-        quantity: 3,
-        updatedAt: new Date(),
+    it('should return stock info with dynamically counted units', async () => {
+      const productWithCount = {
+        ...mockProduct,
+        _count: { movements: 3 },
       };
-      mockPrisma.product.findUnique.mockResolvedValue(lowStockProduct);
+      mockPrisma.product.findUnique.mockResolvedValue(productWithCount);
 
       const result = await service.getStock('prod-1');
 
-      expect(result.isLowStock).toBe(true);
       expect(result.quantity).toBe(3);
+      expect(result.isLowStock).toBe(true);
     });
 
-    it('should mark product as NOT low stock when quantity > 5', async () => {
-      mockPrisma.product.findUnique.mockResolvedValue({
-        id: 'prod-1',
-        code: 'CS-001',
-        name: 'Product',
-        quantity: 100,
-        updatedAt: new Date(),
-      });
+    it('should mark product as NOT low stock when count > 5', async () => {
+      const productWithCount = {
+        ...mockProduct,
+        _count: { movements: 10 },
+      };
+      mockPrisma.product.findUnique.mockResolvedValue(productWithCount);
 
       const result = await service.getStock('prod-1');
 
+      expect(result.quantity).toBe(10);
       expect(result.isLowStock).toBe(false);
     });
   });
 
   describe('remove', () => {
-    it('should throw BadRequestException when product has movements', async () => {
+    it('should throw BadRequestException when product has INSTALADO units', async () => {
       mockPrisma.product.findUnique.mockResolvedValue(mockProduct);
-      mockPrisma.inventoryMovement.count.mockResolvedValue(5);
+      mockPrisma.inventoryMovement.count.mockResolvedValue(1); // 1 INSTALADO
 
       await expect(service.remove('prod-1')).rejects.toThrow(
         BadRequestException,
       );
     });
 
-    it('should delete product successfully when no movements exist', async () => {
+    it('should delete product successfully when no INSTALADO units exist', async () => {
       mockPrisma.product.findUnique.mockResolvedValue(mockProduct);
       mockPrisma.inventoryMovement.count.mockResolvedValue(0);
+      mockPrisma.inventoryMovement.deleteMany.mockResolvedValue({ count: 5 });
       mockPrisma.product.delete.mockResolvedValue(mockProduct);
 
       const result = await service.remove('prod-1');
 
+      expect(mockPrisma.inventoryMovement.deleteMany).toHaveBeenCalled();
+      expect(mockPrisma.product.delete).toHaveBeenCalled();
       expect(result.message).toContain('removido');
     });
   });

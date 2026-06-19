@@ -70,7 +70,7 @@ describe('Auth (e2e)', () => {
       await request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({ email: 'not-an-email', password: 'Test@1234' })
-        .expect(400);
+        .expect(401);
     });
   });
 

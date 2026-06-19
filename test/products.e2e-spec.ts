@@ -53,10 +53,12 @@ describe('Products (e2e)', () => {
   });
 
   afterAll(async () => {
-    await prisma.inventoryMovement.deleteMany({
-      where: { product: { categoryId } },
-    });
-    await prisma.product.deleteMany({ where: { categoryId } });
+    if (productId) {
+      await prisma.inventoryMovement.deleteMany({
+        where: { productId },
+      });
+      await prisma.product.delete({ where: { id: productId } });
+    }
     await prisma.category.delete({ where: { id: categoryId } });
     await prisma.user.deleteMany({
       where: { email: 'admin-prod-test@test.com' },
@@ -65,26 +67,29 @@ describe('Products (e2e)', () => {
   });
 
   describe('POST /api/v1/products', () => {
-    it('should create a product', async () => {
+    it('should create a product and its inventory units', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/v1/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          code: `E2E-PROD-${Date.now()}`,
           name: 'Painel Solar Teste 400W',
-          brand: 'Brand E2E',
-          type: 'MONOCRYSTALLINE',
-          wattage: 400,
-          categoryId,
-          price: 850.0,
+          vendor: 'Vendor E2E',
+          type: 'SOLAR_PANEL',
+          cost: 850.0,
           quantity: 10,
+          purchaseDate: new Date().toISOString(),
         })
         .expect(201);
 
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe('Painel Solar Teste 400W');
-      expect(response.body.quantity).toBe(10);
       productId = response.body.id as string;
+
+      // Verify that 10 units were created in inventory
+      const unitsCount = await prisma.inventoryMovement.count({
+        where: { productId },
+      });
+      expect(unitsCount).toBe(10);
     });
 
     it('should fail with invalid type', async () => {
@@ -92,12 +97,12 @@ describe('Products (e2e)', () => {
         .post('/api/v1/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          code: 'BAD-TYPE-001',
           name: 'Invalid Product',
-          brand: 'Brand',
+          vendor: 'Vendor',
           type: 'INVALID_TYPE',
-          categoryId,
-          price: 100,
+          cost: 100,
+          quantity: 1,
+          purchaseDate: new Date().toISOString(),
         })
         .expect(400);
     });
@@ -106,12 +111,12 @@ describe('Products (e2e)', () => {
       await request(app.getHttpServer())
         .post('/api/v1/products')
         .send({
-          code: 'NO-AUTH',
           name: 'Test',
-          brand: 'B',
-          type: 'MONOCRYSTALLINE',
-          categoryId,
-          price: 100,
+          vendor: 'Vendor',
+          type: 'SOLAR_PANEL',
+          cost: 100,
+          quantity: 1,
+          purchaseDate: new Date().toISOString(),
         })
         .expect(401);
     });
@@ -134,13 +139,13 @@ describe('Products (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get('/api/v1/products')
         .set('Authorization', `Bearer ${adminToken}`)
-        .query({ type: 'MONOCRYSTALLINE' })
+        .query({ type: 'SOLAR_PANEL' })
         .expect(200);
 
-      const allMono = response.body.data.every(
-        (p: { type: string }) => p.type === 'MONOCRYSTALLINE',
+      const allSolar = response.body.data.every(
+        (p: { type: string }) => p.type === 'SOLAR_PANEL',
       );
-      expect(allMono).toBe(true);
+      expect(allSolar).toBe(true);
     });
   });
 
@@ -152,6 +157,7 @@ describe('Products (e2e)', () => {
         .expect(200);
 
       expect(response.body).toHaveProperty('quantity');
+      expect(response.body.quantity).toBe(10);
       expect(response.body).toHaveProperty('isLowStock');
     });
   });
@@ -161,7 +167,7 @@ describe('Products (e2e)', () => {
       const response = await request(app.getHttpServer())
         .patch(`/api/v1/products/${productId}`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ name: 'Painel Solar Atualizado 400W', price: 900.0 })
+        .send({ name: 'Painel Solar Atualizado 400W' })
         .expect(200);
 
       expect(response.body.name).toBe('Painel Solar Atualizado 400W');

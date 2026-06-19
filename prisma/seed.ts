@@ -1,4 +1,4 @@
-import { PrismaClient, ProductType } from '@prisma/client';
+import { PrismaClient, ProductType, ItemStatus } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -26,87 +26,93 @@ async function main() {
     },
   });
 
-  const residential = await prisma.category.upsert({
+  await prisma.category.upsert({
     where: { name: 'Residencial' },
     update: {},
     create: { name: 'Residencial', description: 'Painéis para uso residencial' },
   });
 
-  const commercial = await prisma.category.upsert({
+  await prisma.category.upsert({
     where: { name: 'Comercial' },
     update: {},
     create: { name: 'Comercial', description: 'Painéis para uso comercial' },
   });
 
-  const industrial = await prisma.category.upsert({
+  await prisma.category.upsert({
     where: { name: 'Industrial' },
     update: {},
     create: { name: 'Industrial', description: 'Painéis para uso industrial' },
   });
 
-  await prisma.product.upsert({
+  // Seed Product 1
+  const p1 = await prisma.product.upsert({
     where: { code: 'CS-MONO-400W' },
     update: {},
     create: {
       code: 'CS-MONO-400W',
       name: 'Painel Solar Canadian Solar 400W',
       description: 'Painel solar monocristalino de alto desempenho 400W',
-      brand: 'Canadian Solar',
-      type: ProductType.MONOCRYSTALLINE,
-      wattage: 400,
-      categoryId: residential.id,
-      price: 850.0,
-      quantity: 50,
+      vendor: 'Canadian Solar',
+      type: ProductType.SOLAR_PANEL,
+      purchaseDate: new Date('2024-01-15T00:00:00.000Z'),
+      cost: 850.0,
     },
   });
 
-  await prisma.product.upsert({
+  // Seed Product 2
+  const p2 = await prisma.product.upsert({
     where: { code: 'JK-MONO-550W' },
     update: {},
     create: {
       code: 'JK-MONO-550W',
       name: 'Painel Solar Jinko Tiger 550W',
       description: 'Painel solar monocristalino bifacial de alta potência 550W',
-      brand: 'Jinko Solar',
-      type: ProductType.BIFACIAL,
-      wattage: 550,
-      categoryId: commercial.id,
-      price: 1200.0,
-      quantity: 30,
+      vendor: 'Jinko Solar',
+      type: ProductType.SOLAR_PANEL,
+      purchaseDate: new Date('2024-01-20T00:00:00.000Z'),
+      cost: 1200.0,
     },
   });
 
-  await prisma.product.upsert({
+  // Seed Product 3
+  const p3 = await prisma.product.upsert({
     where: { code: 'LON-POLY-330W' },
     update: {},
     create: {
       code: 'LON-POLY-330W',
       name: 'Painel Solar Longi 330W Policristalino',
       description: 'Painel solar policristalino econômico 330W',
-      brand: 'Longi Solar',
-      type: ProductType.POLYCRYSTALLINE,
-      wattage: 330,
-      categoryId: residential.id,
-      price: 620.0,
-      quantity: 80,
+      vendor: 'Longi Solar',
+      type: ProductType.SOLAR_PANEL,
+      purchaseDate: new Date('2024-01-25T00:00:00.000Z'),
+      cost: 620.0,
     },
   });
 
-  await prisma.product.upsert({
-    where: { code: 'RISEN-BIFACIAL-600W' },
-    update: {},
-    create: {
-      code: 'RISEN-BIFACIAL-600W',
-      name: 'Painel Solar Risen Energy 600W Bifacial',
-      description: 'Painel solar bifacial para uso industrial 600W',
-      brand: 'Risen Energy',
-      type: ProductType.BIFACIAL,
-      wattage: 600,
-      categoryId: industrial.id,
-      price: 1500.0,
-      quantity: 20,
-    },
-  });
+  // Create some inventory movements for these products
+  const products = [p1, p2, p3];
+  for (const p of products) {
+    const existingMovements = await prisma.inventoryMovement.count({
+      where: { productId: p.id },
+    });
+    if (existingMovements === 0) {
+      // Create 5 units in stock
+      const inStockUnits = Array.from({ length: 5 }, () => ({
+        productId: p.id,
+        status: ItemStatus.EM_ESTOQUE,
+        observations: 'Unidade inicial de semente',
+      }));
+      // Create 2 installed units
+      const installedUnits = Array.from({ length: 2 }, () => ({
+        productId: p.id,
+        status: ItemStatus.INSTALADO,
+        observations: 'Unidade instalada na semente',
+      }));
+      await prisma.inventoryMovement.createMany({
+        data: [...inStockUnits, ...installedUnits],
+      });
+    }
+  }
 
   console.log('✅ Seed concluído com sucesso!');
   console.log(`👤 Usuário 1: admin@greenestoque.com / Admin@123`);
