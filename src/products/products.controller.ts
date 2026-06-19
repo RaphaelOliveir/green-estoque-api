@@ -38,13 +38,24 @@ export class ProductsController {
     description:
       'Cria um novo produto no estoque. O código (UUID) é gerado automaticamente. A data de entrada em estoque (entryStockDate) também é definida automaticamente. Uma movimentação de inventário inicial (EM_ESTOQUE) é criada automaticamente.',
   })
-  @ApiBody({ type: CreateProductDto, description: 'Dados do produto a ser cadastrado' })
+  @ApiBody({
+    type: CreateProductDto,
+    description: 'Dados do produto a ser cadastrado',
+  })
   @ApiResponse({
     status: 201,
-    description: 'Produto criado com sucesso. Retorna o objeto completo do produto criado, incluindo o código UUID gerado.',
+    description:
+      'Produto criado com sucesso. Retorna o objeto completo do produto criado, incluindo o código UUID gerado.',
   })
-  @ApiResponse({ status: 400, description: 'Dados inválidos — verifique os campos obrigatórios e seus formatos' })
-  @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Dados inválidos — verifique os campos obrigatórios e seus formatos',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado — token JWT ausente ou inválido',
+  })
   create(@Body() dto: CreateProductDto) {
     return this.productsService.create(dto);
   }
@@ -52,7 +63,8 @@ export class ProductsController {
   @Get()
   @ApiOperation({
     summary: 'Listar produtos com filtros e paginação',
-    description: 'Retorna uma lista paginada de produtos. Suporta busca por texto e filtros por tipo, fornecedor, código e estoque baixo.',
+    description:
+      'Retorna uma lista paginada de produtos. Suporta busca por texto e filtros por tipo, fornecedor, código e estoque baixo.',
   })
   @ApiQuery({
     name: 'search',
@@ -77,14 +89,29 @@ export class ProductsController {
     required: false,
     description: 'Filtrar pelo código UUID do produto',
   })
-
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número da página (padrão: 1)', example: 1 })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Itens por página (padrão: 20, máx: 100)', example: 20 })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número da página (padrão: 1)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Itens por página (padrão: 20, máx: 100)',
+    example: 20,
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista de produtos retornada com sucesso. Inclui metadados de paginação (total, página atual, total de páginas).',
+    description:
+      'Lista de produtos retornada com sucesso. Inclui metadados de paginação (total, página atual, total de páginas).',
   })
-  @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido' })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado — token JWT ausente ou inválido',
+  })
   findAll(@Query() filter: FilterProductsDto) {
     return this.productsService.findAll(filter);
   }
@@ -92,18 +119,20 @@ export class ProductsController {
   @Get('vendors')
   @ApiOperation({
     summary: 'Listar fornecedores disponíveis',
-    description: 'Retorna uma lista de todos os fornecedores únicos cadastrados nos produtos.',
+    description:
+      'Retorna uma lista de todos os fornecedores únicos cadastrados nos produtos.',
   })
   @ApiResponse({
     status: 200,
     description: 'Lista de nomes de fornecedores retornada com sucesso.',
   })
-  @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido' })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado — token JWT ausente ou inválido',
+  })
   getVendors() {
     return this.productsService.getVendors();
   }
-
-
 
   @Get(':id')
   @ApiOperation({
@@ -116,8 +145,14 @@ export class ProductsController {
     example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
   })
   @ApiResponse({ status: 200, description: 'Produto encontrado com sucesso.' })
-  @ApiResponse({ status: 404, description: 'Produto não encontrado para o ID informado.' })
-  @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido' })
+  @ApiResponse({
+    status: 404,
+    description: 'Produto não encontrado para o ID informado.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado — token JWT ausente ou inválido',
+  })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.findOne(id);
   }
@@ -125,7 +160,8 @@ export class ProductsController {
   @Get(':id/stock')
   @ApiOperation({
     summary: 'Verificar estoque disponível em tempo real',
-    description: 'Retorna a quantidade atual em estoque do produto (calculada dinamicamente com base nas unidades disponíveis) e indica se está com estoque baixo (≤ 5 unidades).',
+    description:
+      'Retorna a quantidade atual em estoque do produto (calculada dinamicamente com base nas unidades disponíveis) e indica se está com estoque baixo (≤ 5 unidades).',
   })
   @ApiParam({
     name: 'id',
@@ -134,10 +170,14 @@ export class ProductsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Retorna id, code, name, updatedAt, quantity (calculado via movimentações com status EM_ESTOQUE) e isLowStock do produto.',
+    description:
+      'Retorna id, code, name, updatedAt, quantity (calculado via movimentações com status EM_ESTOQUE) e isLowStock do produto.',
   })
   @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
-  @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido' })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado — token JWT ausente ou inválido',
+  })
   getStock(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.getStock(id);
   }
@@ -145,18 +185,25 @@ export class ProductsController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Atualizar produto',
-    description: 'Atualiza parcialmente os dados de um produto. Apenas os campos informados serão alterados.',
+    description:
+      'Atualiza parcialmente os dados de um produto. Apenas os campos informados serão alterados.',
   })
   @ApiParam({
     name: 'id',
     description: 'ID único do produto (UUID)',
     example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
   })
-  @ApiBody({ type: UpdateProductDto, description: 'Campos a serem atualizados (todos opcionais)' })
+  @ApiBody({
+    type: UpdateProductDto,
+    description: 'Campos a serem atualizados (todos opcionais)',
+  })
   @ApiResponse({ status: 200, description: 'Produto atualizado com sucesso.' })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
-  @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido' })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado — token JWT ausente ou inválido',
+  })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProductDto,
@@ -167,7 +214,8 @@ export class ProductsController {
   @Delete(':id')
   @ApiOperation({
     summary: 'Remover produto',
-    description: 'Remove permanentemente um produto do sistema. Não é possível remover produtos que possuam movimentações de estoque registradas.',
+    description:
+      'Remove permanentemente um produto do sistema. Não é possível remover produtos que possuam movimentações de estoque registradas.',
   })
   @ApiParam({
     name: 'id',
@@ -175,9 +223,16 @@ export class ProductsController {
     example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
   })
   @ApiResponse({ status: 200, description: 'Produto removido com sucesso.' })
-  @ApiResponse({ status: 400, description: 'Não é possível remover produto com movimentações registradas.' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Não é possível remover produto com movimentações registradas.',
+  })
   @ApiResponse({ status: 404, description: 'Produto não encontrado.' })
-  @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido' })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado — token JWT ausente ou inválido',
+  })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.remove(id);
   }

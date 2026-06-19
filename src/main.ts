@@ -34,7 +34,10 @@ Inclua o token no header: \`Authorization: Bearer <token>\`
     .addTag('Usuários', 'Gerenciamento de usuários')
 
     .addTag('Produtos', 'Cadastro e consulta de painéis solares')
-    .addTag('Estoque / Unidades Físicas', 'Gerenciamento de unidades físicas individuais em estoque')
+    .addTag(
+      'Estoque / Unidades Físicas',
+      'Gerenciamento de unidades físicas individuais em estoque',
+    )
     .addTag('Relatórios', 'Relatórios e análises')
     .build();
 
@@ -56,4 +59,4 @@ Inclua o token no header: \`Authorization: Bearer <token>\`
   console.log(`📚 Swagger docs at http://localhost:${port}/docs\n`);
 }
 
-bootstrap();
+bootstrap().catch((err) => console.error(err));

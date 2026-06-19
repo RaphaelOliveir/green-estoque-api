@@ -26,7 +26,7 @@ export class AuthService {
     return result;
   }
 
-  async login(user: Omit<User, 'password'>) {
+  login(user: Omit<User, 'password'>) {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,

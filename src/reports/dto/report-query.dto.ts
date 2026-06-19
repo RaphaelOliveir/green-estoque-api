@@ -5,7 +5,8 @@ const ReportQuerySchema = z.object({
   startDate: z
     .string()
     .datetime({
-      message: 'startDate deve estar no formato ISO 8601 (ex: 2024-01-01T00:00:00Z)',
+      message:
+        'startDate deve estar no formato ISO 8601 (ex: 2024-01-01T00:00:00Z)',
     })
     .optional()
     .describe('Data de início do período (ISO 8601, ex: 2024-01-01T00:00:00Z)'),
@@ -22,11 +23,10 @@ const ReportQuerySchema = z.object({
   status: z
     .enum(['EM_ESTOQUE', 'INSTALADO'])
     .optional()
-    .describe("Filtrar por status: EM_ESTOQUE (em estoque) ou INSTALADO (instalado)"),
-  vendor: z
-    .string()
-    .optional()
-    .describe('Filtrar pelo nome do fornecedor'),
+    .describe(
+      'Filtrar por status: EM_ESTOQUE (em estoque) ou INSTALADO (instalado)',
+    ),
+  vendor: z.string().optional().describe('Filtrar pelo nome do fornecedor'),
   page: z
     .string()
     .transform((v) => parseInt(v, 10))

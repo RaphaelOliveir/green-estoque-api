@@ -6,16 +6,12 @@ const FilterProductsSchema = z.object({
     .string()
     .optional()
     .describe('Busca por nome, código ou fornecedor'),
-  vendor: z
-    .string()
-    .optional()
-    .describe('Filtrar por nome do fornecedor'),
+  vendor: z.string().optional().describe('Filtrar por nome do fornecedor'),
   type: z
     .enum(['SOLAR_PANEL', 'INVERTER', 'STRUCTURE'])
     .optional()
     .describe('Filtrar por tipo: SOLAR_PANEL, INVERTER ou STRUCTURE'),
-    // code filter removed
-
+  // code filter removed
 
   page: z
     .string()

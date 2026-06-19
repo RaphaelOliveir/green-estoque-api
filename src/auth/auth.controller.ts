@@ -37,9 +37,13 @@ export class AuthController {
   @ApiBody({ type: LoginDto, description: 'Credenciais de acesso' })
   @ApiResponse({
     status: 200,
-    description: 'Login realizado com sucesso. Retorna o token JWT e dados básicos do usuário.',
+    description:
+      'Login realizado com sucesso. Retorna o token JWT e dados básicos do usuário.',
   })
-  @ApiResponse({ status: 401, description: 'Credenciais inválidas — e-mail ou senha incorretos.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Credenciais inválidas — e-mail ou senha incorretos.',
+  })
   login(@Body() _dto: LoginDto, @CurrentUser() user: Omit<User, 'password'>) {
     return this.authService.login(user);
   }
@@ -49,13 +53,18 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Retorna dados do usuário autenticado',
-    description: 'Retorna as informações do perfil do usuário atualmente autenticado via token JWT.',
+    description:
+      'Retorna as informações do perfil do usuário atualmente autenticado via token JWT.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Dados do usuário autenticado retornados com sucesso (sem campo senha).',
+    description:
+      'Dados do usuário autenticado retornados com sucesso (sem campo senha).',
   })
-  @ApiResponse({ status: 401, description: 'Não autorizado — token JWT ausente ou inválido.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado — token JWT ausente ou inválido.',
+  })
   getProfile(@CurrentUser() user: { id: string }) {
     return this.authService.getProfile(user.id);
   }

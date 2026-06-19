@@ -7,7 +7,6 @@ import { PrismaService } from '../prisma/prisma.service';
 
 const mockProduct = {
   id: 'prod-1',
-  code: 'CS-001',
   name: 'Solar Panel 400W',
   vendor: 'Canadian Solar',
 };
@@ -97,7 +96,7 @@ describe('InventoryService', () => {
         where: { id: 'item-1' },
         data: { status: ItemStatus.INSTALADO, observations: undefined },
         include: {
-          product: { select: { id: true, code: true, name: true } },
+          product: { select: { id: true, name: true } },
         },
       });
     });

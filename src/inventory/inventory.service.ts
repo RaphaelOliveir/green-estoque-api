@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ItemStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateItemStatusDto } from './dto/update-item-status.dto';
@@ -86,7 +83,7 @@ export class InventoryService {
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
     });
-    
+
     if (!product) {
       throw new NotFoundException('Produto não encontrado');
     }
@@ -103,7 +100,9 @@ export class InventoryService {
       }),
     ]);
 
-    const totalEmEstoque = items.filter((m) => m.status === 'EM_ESTOQUE').length;
+    const totalEmEstoque = items.filter(
+      (m) => m.status === 'EM_ESTOQUE',
+    ).length;
     const totalInstalado = items.filter((m) => m.status === 'INSTALADO').length;
 
     return {

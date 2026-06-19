@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { ProductsService } from './products.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -38,6 +35,7 @@ const mockPrisma = {
     count: vi.fn(),
     createMany: vi.fn(),
     deleteMany: vi.fn(),
+    create: vi.fn(),
   },
   $transaction: vi.fn((callback) => callback(mockPrisma)),
 };
@@ -73,10 +71,12 @@ describe('ProductsService', () => {
 
       expect(result).toEqual(mockProduct);
       expect(mockPrisma.product.create).toHaveBeenCalledOnce();
-      
-      const createArgs = mockPrisma.product.create.mock.calls[0][0];
-      expect(createArgs.data.movements.create).toBeDefined();
-      expect(createArgs.data.movements.create.status).toEqual('EM_ESTOQUE');
+      expect(mockPrisma.inventoryMovement.create).toHaveBeenCalledOnce();
+
+      const createMovementArgs =
+        mockPrisma.inventoryMovement.create.mock.calls[0][0];
+      expect(createMovementArgs.data.status).toEqual('EM_ESTOQUE');
+      expect(createMovementArgs.data.productId).toEqual(mockProduct.id);
     });
   });
 
