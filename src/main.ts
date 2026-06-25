@@ -52,7 +52,7 @@ Inclua o token no header: \`Authorization: Bearer <token>\`
     },
   });
 
-  const port = process.env.PORT ?? 3000;
+  const port = process.env.PORT ?? 3011;
   await app.listen(port);
 
   console.log(`\n🚀 Server running on http://localhost:${port}/api/v1`);

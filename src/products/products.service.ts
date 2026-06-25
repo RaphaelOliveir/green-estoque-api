@@ -124,7 +124,7 @@ export class ProductsService {
   async update(id: string, dto: UpdateProductDto) {
     await this.findOne(id);
 
-    return this.prisma.product.update({
+    const updatedProduct = await this.prisma.product.update({
       where: { id },
       data: {
         ...dto,
@@ -133,6 +133,23 @@ export class ProductsService {
         }),
       },
     });
+
+    await this.prisma.inventoryMovement.updateMany({
+      where: { productId: id },
+      data: {
+        name: updatedProduct.name,
+        vendor: updatedProduct.vendor,
+        customer: updatedProduct.customer,
+        purchaseDate: updatedProduct.purchaseDate,
+        entryStockDate: updatedProduct.entryStockDate,
+        cost: updatedProduct.cost,
+        type: updatedProduct.type,
+        description: updatedProduct.description,
+        image: updatedProduct.image,
+      },
+    });
+
+    return updatedProduct;
   }
 
   async remove(id: string) {
