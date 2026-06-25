@@ -24,6 +24,9 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FilterProductsDto } from './dto/filter-products.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @ApiTags('Produtos')
 @ApiBearerAuth()
@@ -32,6 +35,8 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
+  @Roles(Role.ENGINEERING)
+  @UseGuards(RolesGuard)
   @Post()
   @ApiOperation({
     summary: 'Cadastrar novo produto',
@@ -182,6 +187,8 @@ export class ProductsController {
     return this.productsService.getStock(id);
   }
 
+  @Roles(Role.ENGINEERING)
+  @UseGuards(RolesGuard)
   @Patch(':id')
   @ApiOperation({
     summary: 'Atualizar produto',
@@ -211,6 +218,8 @@ export class ProductsController {
     return this.productsService.update(id, dto);
   }
 
+  @Roles(Role.ENGINEERING)
+  @UseGuards(RolesGuard)
   @Delete(':id')
   @ApiOperation({
     summary: 'Remover produto',

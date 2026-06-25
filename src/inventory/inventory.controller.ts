@@ -21,6 +21,9 @@ import { ItemStatus } from '@prisma/client';
 import { InventoryService } from './inventory.service';
 import { UpdateItemStatusDto } from './dto/update-item-status.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @ApiTags('Estoque / Unidades Físicas')
 @ApiBearerAuth()
@@ -98,6 +101,8 @@ export class InventoryController {
     return this.inventoryService.findOne(id);
   }
 
+  @Roles(Role.ENGINEERING)
+  @UseGuards(RolesGuard)
   @Patch('items/:id')
   @ApiOperation({
     summary: 'Atualizar status de uma unidade',

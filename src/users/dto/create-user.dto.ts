@@ -19,5 +19,9 @@ const CreateUserSchema = z.object({
     .describe(
       'Senha (mínimo 8 caracteres, deve conter ao menos uma maiúscula e um número)',
     ),
+  role: z
+    .enum(['ENGINEERING', 'FINANCE'])
+    .optional()
+    .describe('Papel do usuário no sistema'),
 });
 export class CreateUserDto extends createZodDto(CreateUserSchema) {}
