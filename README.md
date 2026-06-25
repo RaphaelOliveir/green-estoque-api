@@ -1,98 +1,156 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🌿 Green Estoque API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> REST API for inventory management of a solar panel store — built with NestJS, Prisma and PostgreSQL.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 📋 Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+**Green Estoque API** is the back-end service powering the Green Estoque inventory management system, purpose-built for solar panel retail businesses.
 
-## Project setup
+### Core Features
 
+- **Product Management** — Full CRUD for products, including categories, pricing and stock levels.
+- **Inventory Control** — Track stock entries and exits with movement history and real-time quantity updates.
+- **Reports** — Generate inventory snapshots and movement summaries for better business decisions.
+- **User Management** — Role-based user administration (admin / operator).
+- **Authentication** — Secure login and session control via JWT tokens.
+- **API Documentation** — Interactive Swagger UI available at `/api/docs`.
+
+---
+
+## 🛠️ Stack
+
+### Code
+| Layer | Technology |
+|---|---|
+| Runtime | [Node.js](https://nodejs.org/) |
+| Language | [TypeScript](https://www.typescriptlang.org/) |
+| Framework | [NestJS v11](https://nestjs.com/) |
+| Validation | [Zod](https://zod.dev/) + [nestjs-zod](https://github.com/risenforces/nestjs-zod) + [class-validator](https://github.com/typestack/class-validator) |
+| API Docs | [Swagger / OpenAPI](https://swagger.io/) (`@nestjs/swagger`) |
+
+### Tests
+| Tool | Purpose |
+|---|---|
+| [Vitest](https://vitest.dev/) | Unit & integration test runner |
+| [Supertest](https://github.com/ladjs/supertest) | HTTP end-to-end testing |
+| `@nestjs/testing` | NestJS module test utilities |
+| `@vitest/coverage-v8` | Code coverage reports |
+
+> 🤖 **Agile Vibe Coding with Antigravity** — Development was accelerated with AI-assisted pair programming using [Antigravity](https://deepmind.google), enabling rapid iteration on features, tests and architecture decisions.
+
+### Database
+| Tool | Details |
+|---|---|
+| [PostgreSQL 16](https://www.postgresql.org/) | Primary relational database |
+| [Prisma ORM](https://www.prisma.io/) | Schema management, migrations and query builder |
+
+### Infrastructure
+| Tool | Details |
+|---|---|
+| [Docker](https://www.docker.com/) + [Docker Compose](https://docs.docker.com/compose/) | Local development database containers |
+| [Vercel](https://vercel.com/) | Serverless API deployment |
+| GitHub Actions | CI pipeline (lint, test, build) |
+
+---
+
+## 🔒 Security
+
+Authentication is handled via **JWT (JSON Web Tokens)** in combination with **Passport.js**:
+
+- **`POST /auth/login`** — Validates credentials using `passport-local` and returns a signed JWT.
+- **Protected routes** — Secured with a JWT guard (`passport-jwt`) that validates the `Authorization: Bearer <token>` header on every request.
+- **Password hashing** — User passwords are hashed with `bcryptjs` before being stored.
+- **Role-based access** — Route-level guards enforce role permissions (e.g., admin-only endpoints).
+
+---
+
+## 🚀 How to Run Locally
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) >= 20
+- [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
+- [npm](https://www.npmjs.com/)
+
+### Steps
+
+**1. Clone the repository**
 ```bash
-$ npm install
+git clone https://github.com/your-org/green-estoque-api.git
+cd green-estoque-api
 ```
 
-## Compile and run the project
-
+**2. Set up environment variables**
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env
+# Edit .env and fill in the required values
 ```
 
-## Run tests
-
+**3. Start the database containers**
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker-compose up -d
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+**4. Install dependencies**
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+**5. Run database migrations**
+```bash
+npm run db:migrate
+```
 
-## Resources
+**6. (Optional) Seed the database**
+```bash
+npm run db:seed
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+**7. Start the development server**
+```bash
+npm run start:dev
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The API will be available at `http://localhost:3001`.  
+Swagger documentation: `http://localhost:3001/api/docs`.
 
-## Support
+### Running Tests
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# Unit tests
+npm run test
 
-## Stay in touch
+# Unit tests in watch mode
+npm run test:watch
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# End-to-end tests
+npm run test:e2e
 
-## License
+# Coverage report
+npm run test:cov
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+## 🌐 Production
+
+The production API is deployed on **Vercel** and publicly accessible at:
+
+```
+https://green-estoque-api.vercel.app
+```
+
+Swagger documentation (production):
+```
+https://green-estoque-api.vercel.app/api/docs
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — you are free to use, copy, modify, merge, publish, distribute, sublicense and/or sell copies of this software, provided that the original copyright notice and this permission notice are included in all copies or substantial portions of the software.
+
+See the [LICENSE](./LICENSE) file for full details.
